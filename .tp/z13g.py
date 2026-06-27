@@ -1,1 +1,0 @@
-add('Eye Signal <span>accent color clue</span>','<b>How to test:</b> look for the strongest flecks or rings. Gold, amber, copper, and olive point warm. Slate, blue-gray, icy blue, charcoal, and crisp green point cool.')
