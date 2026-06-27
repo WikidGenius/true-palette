@@ -1,7 +1,7 @@
 {
-  "name": "True Palette",
-  "short_name": "True Palette",
-  "description": "A private browser-based color palette tool for skin, hair, and eye color cues.",
+  "name": "True Palette Atelier",
+  "short_name": "Palette",
+  "description": "A private fashion-first color fitting for skin, hair, and eye color cues.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
