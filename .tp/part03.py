@@ -1,0 +1,1 @@
+kit_css='.kit-list{margin:18px 0 0;padding:0;list-style:none}.kit-list li{border-top:1px solid var(--line);padding:10px 0}.kit-list b{display:block;color:var(--cocoa);font-weight:900}.kit-list span{display:block;color:var(--muted);font-size:13px}'
