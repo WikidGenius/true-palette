@@ -1,0 +1,1 @@
+add('The White Shirt Test <span>undertone clue</span>','<b>How to test:</b> hold white cloth or paper near the neckline. Does white make the complexion look clear and bright, or gray and tired? Then compare cream or ivory.')
