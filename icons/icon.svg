@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="True Palette icon">
+  <rect width="512" height="512" rx="112" fill="#f7f1e8"/>
+  <circle cx="172" cy="180" r="70" fill="#c5794a"/>
+  <circle cx="306" cy="152" r="58" fill="#2f5d62"/>
+  <circle cx="332" cy="286" r="76" fill="#7f4d76"/>
+  <circle cx="202" cy="330" r="62" fill="#d7b377"/>
+  <path d="M128 404c72-40 172-41 256 0" fill="none" stroke="#1f2428" stroke-width="24" stroke-linecap="round"/>
+</svg>
