@@ -1,4 +1,4 @@
-window.state={last:null,activeSlide:0};
+window.state={last:null,activeSlide:0,dockAutoHide:false,lastScrollY:0};
 window.renderReport=function(r){
   state.last=r;
   document.querySelector('#result').className='';
@@ -11,13 +11,34 @@ window.sliderCardHtml=function(d,i){
 };
 window.renderDock=function(r){
   document.body.classList.add('dock-open');
-  document.querySelector('#sliderDock').hidden=false;
+  let dock=document.querySelector('#sliderDock');
+  dock.hidden=false;
+  dock.classList.remove('is-hidden');
   document.querySelector('#outside').checked=false;
   document.querySelector('#deck').innerHTML=SLIDER_DEFS.map(sliderCardHtml).join('');
   document.querySelector('#dots').innerHTML=SLIDER_DEFS.map((d,i)=>`<span class="dot ${i===0?'active':''}"></span>`).join('');
   state.activeSlide=0;
   document.querySelector('#deck').scrollTo({left:0});
   wireDock();
+  setupDockAutoHide();
+};
+window.setupDockAutoHide=function(){
+  if(state.dockAutoHide)return;
+  state.dockAutoHide=true;
+  state.lastScrollY=window.scrollY;
+  let dock=document.querySelector('#sliderDock');
+  let show=()=>dock.classList.remove('is-hidden');
+  let hide=()=>dock.classList.add('is-hidden');
+  window.addEventListener('scroll',()=>{
+    if(!state.last || dock.hidden)return;
+    let y=window.scrollY;
+    if(y>state.lastScrollY+8 && y>120)hide();
+    if(y<state.lastScrollY-8)show();
+    state.lastScrollY=y;
+  },{passive:true});
+  dock.addEventListener('pointerdown',show);
+  dock.addEventListener('focusin',show);
+  dock.addEventListener('touchstart',show,{passive:true});
 };
 window.updateDots=function(){
   let deck=document.querySelector('#deck');
