@@ -15,12 +15,12 @@ window.paletteFromValues=function(v){
   return [['Soft White','#f4eee4'],['Stone','#b7aa9b'],['Charcoal','#333539'],['Denim','#496a89'],['Burgundy','#743448'],['Pewter','#9aa0a4']];
 };
 window.paletteDescription=function(r){
-  let warm=r.rec.temp>20,cool=r.rec.temp<-20,light=r.rec.value>25,deep=r.rec.value<-25,clear=r.rec.chroma>20,soft=r.rec.chroma<-20,sharp=r.rec.def>20,low=r.rec.def<-20;
-  let t=warm?'warm colors like cream, camel, olive, terracotta, and mixed reds':cool?'cool colors like soft white, charcoal, navy, berry, cobalt, and emerald':'balanced colors like stone, denim, burgundy, charcoal, and soft white';
-  let v=light?'Prefer brighter or lighter colors, like the shade has been mixed with a bit of white.':deep?'Prefer deeper colors with more visual weight, like the shade has been mixed with espresso or navy.':'Prefer middle-value colors that are not too pale and not too heavy.';
-  let c=clear?'Clear means saturated color looks intentional rather than loud.':soft?'Soft means muted, blended color looks more expensive than neon.':'Tailored means balanced clarity: polished, but not harsh.';
-  let d=sharp?'Defined means crisp contrast and sharper edges flatter you.':low?'Soft definition means lower-contrast outfits flatter you.':'Tailored contrast means structure without looking stark.';
-  return `${r.direction}. You look great in ${t}. ${v} ${c} ${d}`;
+  let warm=r.rec.temp>20,cool=r.rec.temp<-20,light=r.rec.value>25,deep=r.rec.value<-25,clear=r.rec.chroma>20,soft=r.rec.chroma<-20,defined=r.rec.def>20,low=r.rec.def<-20;
+  let colors=warm?'warm colors like cream, camel, olive, terracotta, and soft red':cool?'cool colors like soft white, gray, navy, berry, blue, and emerald':'balanced colors like stone, denim, burgundy, charcoal, and soft white';
+  let value=light?'Lighter means colors with a little white mixed in will usually feel easier on you.':deep?'Deeper means darker, richer colors will usually support your features better.':'Middle value means stay away from colors that are extremely pale or extremely dark.';
+  let colorStrength=clear?'Clear color means stronger color is okay, as long as it still feels wearable.':soft?'Soft color means quieter, less bright colors will usually look smoother.':'Balanced color means you can wear some color, but skip anything too dull or too neon.';
+  let contrast=defined?'Defined means you can handle clearer light-and-dark contrast.':low?'Soft contrast means outfits with less light-and-dark contrast will usually feel calmer.':'Tailored means use some light-and-dark contrast, but keep it clean and not harsh.';
+  return `${r.direction}. You look great in ${colors}. ${value} ${colorStrength} ${contrast}`;
 };
 window.swatchHtml=function(p){
   return `<div class="palette">${p.map(x=>`<div class="color"><div class="patch" style="background:${x[1]}"></div><b>${x[0]}</b><p class="muted">${x[1]}</p></div>`).join('')}</div>`;
