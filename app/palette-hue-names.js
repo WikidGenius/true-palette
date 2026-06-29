@@ -1,9 +1,10 @@
 window.namePick=(a,i)=>a[Math.max(0,Math.min(a.length-1,i))];
-window.safeHex=function(h,s,l){h=(h%360+360)%360;if(h>=45&&h<=85){s=Math.min(s,52);l=Math.min(l,57)}if(h>85&&h<120){s=Math.min(s,42);l=Math.min(l,48)}return hslHex(h,s,l)};
+window.safeHex=function(h,s,l){h=(h%360+360)%360;if(h>=45&&h<=85){s=Math.min(s,50);l=Math.min(l,54)}if(h>85&&h<120){s=Math.min(s,42);l=Math.min(l,48)}return hslHex(h,s,l)};
 window.hueName=function(h,i){h=(h%360+360)%360;i=Math.max(0,Math.min(9,i));
   if(h<15||h>=345)return namePick(['Oxblood','Burgundy','Rosewood','Cranberry','Ruby','Cherry','Tomato Red','Poppy','Clear Red','Scarlet'],i);
   if(h<45)return namePick(['Burnt Sienna','Terracotta','Cinnamon','Copper','Paprika','Coral Clay','Rust','Cayenne','Clay Red','Persimmon'],i);
-  if(h<75)return namePick(['Antique Gold','Brass','Ochre','Mustard','Old Gold','Marigold','Honey','Goldenrod','Saffron','Amber Gold'],i);
+  if(h<52)return namePick(['Antique Gold','Brass','Old Gold','Ochre','Honey Gold','Muted Gold','Saffron','Burnished Gold','Amber Gold','Golden Beige'],i);
+  if(h<72)return namePick(['Olive Drab','Deep Pesto','Pesto','Golden Olive','Olive Gold','Moss Gold','Pesto Green','Muted Chartreuse','Herbal Olive','Soft Pesto'],i);
   if(h<150)return namePick(['Deep Moss','Forest','Olive','Sage','Moss','Laurel','Leaf Green','Jade','Emerald','Garden Green'],i);
   if(h<190)return namePick(['Deep Teal','Petrol','Storm Teal','Lagoon','Aegean','Soft Teal','Jade Teal','Turquoise','Aqua Teal','Aqua'],i);
   if(h<240)return namePick(['Ink','Navy','Storm Blue','Denim','Cobalt','Sapphire','Cornflower','Sky Blue','Powder Blue','Ice Blue'],i);
@@ -17,5 +18,5 @@ window.paletteFromValues=function(v){
   let lights=warm?['Ivory Silk','Oat Milk','Vanilla Cream','Cafe au Lait','Almond Milk','Champagne','Warm Latte','Biscotti','Honey Silk','Sunlit Cream']:cool?['Porcelain','Pearl','Moonstone','Dove Wing','Silver Mist','Cloud Gray','Frosted Silk','Ice Milk','Winter White','Blue Pearl']:['Ecru','Oyster','Parchment','Driftwood','Pebble','Mushroom','Sandstone','Greige','Soft Taupe','Stone Silk'];
   let neutrals=warm?['Cocoa','Saddle','Chestnut','Toffee','Caramel','Camel','Maple','Amber Tan','Burnished Honey','Golden Beige']:cool?['Graphite','Slate','Charcoal','Steel Blue','Storm Blue','Blue Gray','Pewter','Ash','Smoky Navy','Cool Navy']:['Taupe','Mink','Mushroom','Stone Brown','Hazelnut','Fawn','Greige','Mocha','Latte','Truffle'];
   let anchors=warm?['Espresso','Bark','Mahogany','Olive Brown','Coffee Bean','Dark Saddle','Cognac','Burnt Cinnamon','Bronze Olive','Sable']:cool?['Blackberry','Ink','Midnight','Deep Teal','Pine Shadow','Blue Black','Charcoal Navy','Plum Smoke','Evergreen','Onyx']:['Charcoal','Dark Olive','Earth Brown','Deep Moss','Umber','Root Beer','Smoked Plum','Bitter Chocolate','Storm Taupe','Granite'];
-  return [[namePick(lights,bv),safeHex(neutralHue,neutralSat,lightNeutral)],[namePick(neutrals,bv),safeHex(neutralHue,neutralSat+4,baseLight+5)],[namePick(anchors,bd),safeHex(neutralHue,neutralSat+8,anchorLight)],[hueName(mainHue,bc),safeHex(mainHue,accentSat,Math.min(78,38+bv*4))],[hueName(accentHue,bh),safeHex(accentHue,Math.min(92,accentSat+6),Math.min(80,42+bv*3))],[warm?'Antique Gold':cool?'Brushed Silver':'Mixed Metal',warm?'#d0a036':cool?'#c9d0d4':'#9aa0a4']];
+  return [[namePick(lights,bv),safeHex(neutralHue,neutralSat,lightNeutral)],[namePick(neutrals,bv),safeHex(neutralHue,neutralSat+4,baseLight+5)],[namePick(anchors,bd),safeHex(neutralHue,neutralSat+8,anchorLight)],[hueName(mainHue,bc),safeHex(mainHue,accentSat,Math.min(76,38+bv*4))],[hueName(accentHue,bh),safeHex(accentHue,Math.min(88,accentSat+4),Math.min(74,40+bv*3))],[warm?'Antique Gold':cool?'Brushed Silver':'Mixed Metal',warm?'#d0a036':cool?'#c9d0d4':'#9aa0a4']];
 };
