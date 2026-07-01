@@ -1,6 +1,7 @@
 :root{--touch-min:48px;--thumb-size:28px;--track-size:10px}
 button,.secondary,.primary-build,input,select,textarea{min-height:var(--touch-min)}
 button,.secondary,.primary-build{padding:13px 16px;touch-action:manipulation}
+.builder-actions #tinterOpen{grid-column:1/-1;order:-2}.builder-actions #analyze{order:-1}.builder-actions #sample,.builder-actions [type=reset]{order:0}
 .choice,.setup-card,.mini-choice,.toggle,.palette-swatch-card,.smooth-card{touch-action:manipulation}
 .choice .box,.setup-card{min-height:76px;padding:14px 15px}
 .mini-choice{min-height:48px;padding:12px 13px;border-radius:14px}
