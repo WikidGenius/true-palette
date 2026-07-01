@@ -8,15 +8,15 @@ window.applyConfidenceAndContrastVisuals=function(){
   let contrast=document.querySelector('input[name="contrastDepth"]')?.closest('.range-card');
   if(contrast){
     contrast.querySelectorAll('.quiz-swatch-row').forEach(x=>x.remove());
-    if(!contrast.querySelector('.contrast-pair-row')){
-      contrast.querySelector('input[type=range]').insertAdjacentHTML('beforebegin',`<div class="contrast-pair-row">
-        <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#1b1410"></i><i style="background:#2f2119"></i></span><small>deep + deep</small></span>
-        <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#e9d5bd"></i><i style="background:#d8c4aa"></i></span><small>light + light</small></span>
-        <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#3a2418"></i><i style="background:#9b6f52"></i></span><small>balanced</small></span>
-        <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#5a3925"></i><i style="background:#f2d7c4"></i></span><small>medium high</small></span>
-        <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#050505"></i><i style="background:#f7efe7"></i></span><small>high</small></span>
-      </div>`);
-    }
+    let old=contrast.querySelector('.contrast-pair-row');
+    if(old)old.remove();
+    contrast.querySelector('input[type=range]').insertAdjacentHTML('beforebegin',`<div class="contrast-pair-row">
+      <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#1b1410"></i><i style="background:#3b271f"></i></span><small>low deep</small></span>
+      <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#d7b477"></i><i style="background:#efd5bf"></i></span><small>low light</small></span>
+      <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#6f452e"></i><i style="background:#9f6f52"></i></span><small>balanced</small></span>
+      <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#2b1d18"></i><i style="background:#d8ad8f"></i></span><small>medium high</small></span>
+      <span class="contrast-pair"><span class="contrast-pair-chip"><i style="background:#080808"></i><i style="background:#f2dccd"></i></span><small>high</small></span>
+    </div>`);
   }
 };
 const oldRenderMixedQuizForVisuals=window.renderMixedQuiz;
