@@ -1,0 +1,1 @@
+body.report-waiting .report{display:none!important}body.report-waiting .grid{grid-template-columns:1fr}.report-ready .report{display:block}@media(max-width:900px){body.report-waiting .grid{grid-template-columns:1fr}}
