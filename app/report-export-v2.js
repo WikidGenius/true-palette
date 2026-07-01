@@ -1,10 +1,12 @@
 (function(){
   function loadHtml2Canvas(){return new Promise((resolve,reject)=>{if(window.html2canvas)return resolve();let s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js';s.onload=resolve;s.onerror=reject;document.head.appendChild(s)})}
+  async function nextFrame(){return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)))}
   async function exportPng(){
     const card=document.querySelector('#styleReportCard')||document.querySelector('#result');
     if(!card||card.classList.contains('empty')){alert('Build a palette first.');return}
     const btn=document.querySelector('#pngExport'),old=btn?btn.textContent:'';if(btn)btn.textContent='Creating PNG...';
-    try{await loadHtml2Canvas();let canvas=await html2canvas(card,{backgroundColor:'#fffdf8',scale:2,useCORS:true});let a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='true-palette-style-report.png';a.click()}catch(e){alert('PNG export failed. Try Print / PDF instead.')}finally{if(btn)btn.textContent=old||'PNG'}
+    document.body.classList.add('png-exporting');
+    try{await loadHtml2Canvas();await nextFrame();let canvas=await html2canvas(card,{backgroundColor:'#fffdf8',scale:2,useCORS:true,windowWidth:900});let a=document.createElement('a');a.href=canvas.toDataURL('image/png');a.download='true-palette-style-report.png';a.click()}catch(e){alert('PNG export failed. Try Print / PDF instead.')}finally{document.body.classList.remove('png-exporting');if(btn)btn.textContent=old||'PNG'}
   }
   function installExportButtons(){
     const copy=document.querySelector('#copy'),json=document.querySelector('#json'),actions=document.querySelector('.report .actions');
