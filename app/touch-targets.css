@@ -1,0 +1,18 @@
+:root{--touch-min:48px;--thumb-size:28px;--track-size:10px}
+button,.secondary,.primary-build,input,select,textarea{min-height:var(--touch-min)}
+button,.secondary,.primary-build{padding:13px 16px;touch-action:manipulation}
+.choice,.setup-card,.mini-choice,.toggle,.palette-swatch-card,.smooth-card{touch-action:manipulation}
+.choice .box,.setup-card{min-height:76px;padding:14px 15px}
+.mini-choice{min-height:48px;padding:12px 13px;border-radius:14px}
+.confirm-row{gap:10px}
+input[type=radio],input[type=checkbox]{width:22px;height:22px;min-height:22px;flex:0 0 22px;accent-color:var(--teal)}
+.toggle{min-height:44px;display:inline-flex;align-items:center;gap:8px;padding:6px 0}
+input[type=range],.gslider,#tinterWarmth,#tinterTint{width:100%;height:44px;min-height:44px;padding:0;background:transparent;touch-action:pan-x;accent-color:var(--teal)}
+input[type=range]::-webkit-slider-runnable-track{height:var(--track-size);border-radius:999px;background:#e6dacc;border:1px solid rgba(58,38,29,.10)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:var(--thumb-size);height:var(--thumb-size);border-radius:999px;background:var(--teal);border:4px solid #fffdf8;box-shadow:0 2px 8px rgba(31,36,40,.24);margin-top:calc((var(--track-size) - var(--thumb-size))/2)}
+input[type=range]::-moz-range-track{height:var(--track-size);border-radius:999px;background:#e6dacc;border:1px solid rgba(58,38,29,.10)}
+input[type=range]::-moz-range-thumb{width:var(--thumb-size);height:var(--thumb-size);border-radius:999px;background:var(--teal);border:4px solid #fffdf8;box-shadow:0 2px 8px rgba(31,36,40,.24)}
+.range-card{padding:15px 14px}.range-labels{font-size:13px;margin-top:2px}.range-head span[id$="Val"]{min-width:42px;text-align:right;font-weight:900}
+.dock-foot button{min-width:52px;min-height:46px}.dock-close,.tinter-close{min-width:46px;min-height:46px}
+.tinter-balance input[type=range]{height:46px}.tinter-balance button{min-height:42px}.smooth-card{min-height:148px}.smooth-chip{min-height:78px}
+@media(max-width:650px){:root{--thumb-size:30px;--track-size:11px}.choice .box,.setup-card{min-height:82px}.primary-build{min-height:56px}.smooth-card{min-height:138px}.tinter-balance input[type=range]{height:48px}}
