@@ -4,6 +4,7 @@
       if(Tinter.stream){Tinter.stream.getTracks().forEach(t=>t.stop());Tinter.stream=null}
       Tinter.i=0;Tinter.answers=[];Tinter.nudges={temp:0,value:0,chroma:0,def:0,hue:0};
       Tinter.lightingCorrection=0;Tinter.tintCorrection=0;Tinter.lightingConfidence='skipped';
+      if(typeof Tinter.clearCompleteButton==='function')Tinter.clearCompleteButton();
     }
     const modal=document.querySelector('#tinterModal');
     if(modal)modal.hidden=true;
