@@ -2,7 +2,7 @@
   function applyTinterIcon(){
     const btn=document.querySelector('#tinterOpen');
     if(!btn)return;
-    btn.innerHTML='<span class="tinter-style-glyph" aria-hidden="true">style</span><span class="tinter-word">tinter</span>';
+    btn.innerHTML='<span class="tinter-logo-lockup"><span class="tinter-style-glyph" aria-hidden="true">style</span><span class="tinter-word">tinter</span></span>';
     btn.setAttribute('aria-label','Open Tinter');
     btn.classList.add('tinter-entry','tinter-wordmark');
   }
