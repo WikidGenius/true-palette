@@ -13,7 +13,7 @@ input[type=range]::-webkit-slider-runnable-track{height:var(--track-size);border
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:var(--thumb-size);height:var(--thumb-size);border-radius:999px;background:var(--teal);border:4px solid #fffdf8;box-shadow:0 2px 8px rgba(31,36,40,.24);margin-top:calc((var(--track-size) - var(--thumb-size))/2)}
 input[type=range]::-moz-range-track{height:var(--track-size);border-radius:999px;background:#e6dacc;border:1px solid rgba(58,38,29,.10)}
 input[type=range]::-moz-range-thumb{width:var(--thumb-size);height:var(--thumb-size);border-radius:999px;background:var(--teal);border:4px solid #fffdf8;box-shadow:0 2px 8px rgba(31,36,40,.24)}
-.range-card{padding:15px 14px}.range-labels{font-size:13px;margin-top:2px}.range-head span[id$="Val"]{min-width:42px;text-align:right;font-weight:900}
+.range-card{padding:15px 14px}.range-labels{font-size:13px;margin-top:2px}.range-head output{min-width:42px;text-align:right;font-weight:900;color:var(--teal);font-variant-numeric:tabular-nums}
 .dock-foot button{min-width:52px;min-height:46px}.dock-close,.tinter-close{min-width:46px;min-height:46px}
 .tinter-balance input[type=range]{height:46px}.tinter-balance button{min-height:42px}.smooth-card{min-height:148px}.smooth-chip{min-height:78px}
 @media(max-width:650px){:root{--thumb-size:30px;--track-size:11px}.choice .box,.setup-card{min-height:82px}.primary-build{min-height:56px}.smooth-card{min-height:138px}.tinter-balance input[type=range]{height:48px}}
