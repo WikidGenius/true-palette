@@ -17,7 +17,11 @@ assert.equal(queue[0].stage,'practice','practice round should come first');
 
 const practice=queue[0];
 const practiceTie=survey.scoreResponse(practice,null,'good');
+const practiceForced=survey.scoreResponse(practice,'left','good');
 assert.deepEqual(Object.values(practiceTie.delta),[0,0,0,0,0],'practice round must not affect color scores');
+assert.equal(practiceTie.vote,0,'using the tie control should pass calibration');
+assert.notEqual(practiceForced.vote,0,'forcing a swatch choice must be detectable by calibration');
+assert.deepEqual(Object.values(practiceForced.delta),[0,0,0,0,0],'failed calibration still must not affect color scores');
 
 const firstDiagnostic=queue.find(item=>item.axis&&!item.control);
 const left=survey.scoreResponse(firstDiagnostic,'left','good');
