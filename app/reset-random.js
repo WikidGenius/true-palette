@@ -1,54 +1,81 @@
 (function(){
+  'use strict';
+
+  const q=s=>document.querySelector(s);
+
   function resetTinter(){
-    if(window.Tinter){
-      if(Tinter.stream){Tinter.stream.getTracks().forEach(t=>t.stop());Tinter.stream=null}
-      Tinter.i=0;Tinter.answers=[];Tinter.nudges={temp:0,value:0,chroma:0,def:0,hue:0};
-      Tinter.lightingCorrection=0;Tinter.tintCorrection=0;Tinter.lightingConfidence='skipped';
-      if(typeof Tinter.clearCompleteButton==='function')Tinter.clearCompleteButton();
-    }
-    const modal=document.querySelector('#tinterModal');
+    if(window.Tinter?.reset)Tinter.reset();
+    else if(window.Tinter?.stream){Tinter.stream.getTracks().forEach(track=>track.stop());Tinter.stream=null}
+    const modal=q('#tinterModal');
     if(modal)modal.hidden=true;
   }
+
   function clearReport(){
     if(window.state){state.last=null;state.adjusted=false}
     if(typeof closeDock==='function')closeDock();
-    else{let d=document.querySelector('#sliderDock');if(d)d.hidden=true;document.body.classList.remove('dock-open')}
-    const result=document.querySelector('#result');
-    if(result){result.className='empty';result.innerHTML='Complete the intake, then tap <b>Build My Palette</b>.'}
-    const copy=document.querySelector('#copy');
+    const result=q('#result');
+    if(result){result.className='empty';result.innerHTML='Complete Tinter to create your wardrobe palette.'}
+    const copy=q('#copy');
     if(copy)copy.textContent='Copy Style Report';
+    document.body.classList.add('report-waiting');
+    document.body.classList.remove('report-ready','has-analysis');
   }
+
+  function hideRefinement(){
+    const section=q('#refineSection');
+    if(section)section.hidden=true;
+    const details=q('#refineDetails');
+    if(details)details.open=false;
+  }
+
   function clearQuiz(){
-    const form=document.querySelector('#quiz');
-    if(!form)return;
-    const client=document.querySelector('#client');
+    if(typeof renderIntake==='function')renderIntake();
+    const client=q('#client');
     if(client)client.value='';
-    form.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(i=>i.checked=false);
-    form.querySelectorAll('input[type=range]').forEach(i=>{i.value=50;let v=document.querySelector('#'+i.name+'Val');if(v)v.textContent='—'});
-    resetTinter();clearReport();
+    disableRefinement?.();
+    resetTinter();
+    clearReport();
+    hideRefinement();
+    window.scrollTo({top:0,behavior:'smooth'});
   }
+
   function randomizeQuiz(){
-    const form=document.querySelector('#quiz');
+    if(typeof renderIntake==='function')renderIntake();
+    const section=q('#refineSection');
+    const details=q('#refineDetails');
+    if(section)section.hidden=false;
+    if(details)details.open=true;
+    const form=q('#quiz');
     if(!form)return;
-    const client=document.querySelector('#client');
-    if(client)client.value='Random Client';
+    const client=q('#client');
+    if(client)client.value='Demo Client';
     const groups={};
-    form.querySelectorAll('input[type=radio]').forEach(i=>{(groups[i.name] ||= []).push(i);i.checked=false});
-    Object.values(groups).forEach(g=>{g[Math.floor(Math.random()*g.length)].checked=true});
-    form.querySelectorAll('input[type=checkbox]').forEach(i=>i.checked=Math.random()>.25);
-    form.querySelectorAll('input[type=range]').forEach(i=>{let v=Math.round(10+Math.random()*80);i.value=v;let out=document.querySelector('#'+i.name+'Val');if(out)out.textContent=v});
-    resetTinter();clearReport();
+    form.querySelectorAll('input[type=radio]').forEach(input=>{(groups[input.name]||=[]).push(input);input.checked=false});
+    Object.values(groups).forEach(group=>{group[Math.floor(Math.random()*group.length)].checked=true});
+    form.querySelectorAll('input[type=checkbox]').forEach(input=>input.checked=Math.random()>.2);
+    form.querySelectorAll('input[type=range]').forEach(input=>{
+      const value=Math.round(12+Math.random()*76);
+      input.value=value;
+      const output=q(`#${input.name}Val`);
+      if(output)output.value=value;
+    });
+    disableRefinement?.();
+    resetTinter();
+    clearReport();
   }
+
   function install(){
-    const sample=document.querySelector('#sample');
-    if(sample){sample.textContent='Random Answers';sample.setAttribute('aria-label','Randomly answer quiz questions');sample.onclick=e=>{e.preventDefault();randomizeQuiz()}}
-    const form=document.querySelector('#quiz');
+    const sample=q('#sample');
+    if(sample){sample.textContent='Demo answers';sample.setAttribute('aria-label','Fill the camera-free form with demo answers');sample.onclick=event=>{event.preventDefault();randomizeQuiz()}}
+    const form=q('#quiz');
     if(form&&!form.dataset.resetRandom){
       form.dataset.resetRandom='true';
-      form.addEventListener('reset',e=>{e.preventDefault();clearQuiz()});
+      form.addEventListener('reset',event=>{event.preventDefault();clearQuiz()});
     }
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);else install();
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);
+  else install();
   window.clearTruePaletteQuiz=clearQuiz;
   window.randomizeTruePaletteQuiz=randomizeQuiz;
 })();
