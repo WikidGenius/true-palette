@@ -1,0 +1,41 @@
+name: Tinter Survey Check
+
+on:
+  push:
+    paths:
+      - 'app/tinter-survey-v10.js'
+      - 'app/tinter-runtime-v10.js'
+      - 'app/tinter-immersive-v9.js'
+      - 'app/report-ui-v6.js'
+      - 'scripts/test-tinter-survey.mjs'
+      - '.github/workflows/tinter-survey-check.yml'
+  pull_request:
+    paths:
+      - 'app/tinter-survey-v10.js'
+      - 'app/tinter-runtime-v10.js'
+      - 'app/tinter-immersive-v9.js'
+      - 'app/report-ui-v6.js'
+      - 'scripts/test-tinter-survey.mjs'
+      - '.github/workflows/tinter-survey-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  survey-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check active JavaScript syntax
+        run: |
+          node --check app/tinter-survey-v10.js
+          node --check app/tinter-runtime-v10.js
+          node --check app/tinter-usability-v8.js
+          node --check app/tinter-immersive-v9.js
+          node --check app/report-ui-v6.js
+      - name: Test adaptive survey engine
+        run: node scripts/test-tinter-survey.mjs
