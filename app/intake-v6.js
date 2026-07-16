@@ -3,9 +3,14 @@
 
   const clamp=(n,min,max)=>Math.max(min,Math.min(max,n));
   const q=s=>document.querySelector(s);
+  const clone=value=>JSON.parse(JSON.stringify(value));
 
   window.clampValue=n=>clamp(Math.round(Number(n)||0),-100,100);
   window.signed=n=>`${n>0?'+':''}${Math.round(Number(n)||0)}`;
+  window.Refinement={enabled:false};
+  window.enableRefinement=()=>{Refinement.enabled=true};
+  window.disableRefinement=()=>{Refinement.enabled=false};
+
   window.SLIDER_DEFS=[
     ['temp','Warm or Cool','Color temperature','Cool','Warm'],
     ['value','Light or Dark','Overall depth','Deep','Light'],
@@ -22,6 +27,19 @@
       def:contrast==='soft'?[-85,15,'Lower contrast supports softer features.']:contrast==='sharp'?[-5,90,'Higher contrast supports stronger definition.']:[-40,65,'Clean, moderate contrast is the safest range.'],
       hue:hueCue>0?[15,90,'Hair and eye cues lean warm.']:hueCue<0?[-90,-15,'Hair and eye cues lean cool.']:[-45,45,'Hair and eye cues are mixed.']
     };
+  };
+
+  const directionFromRec=rec=>[
+    rec.temp>22?'Warm':rec.temp<-22?'Cool':'Balanced',
+    rec.value<-25?'Deep':rec.value>25?'Light':'Medium',
+    rec.def>20?'Defined':rec.def<-20?'Soft':'Tailored'
+  ].join(' ');
+
+  const locksFromRec=rec=>{
+    const contrast=rec.def<-20?'soft':rec.def>20?'sharp':'balanced';
+    const depth=-rec.value/70;
+    const hueCue=rec.hue>15?1:rec.hue<-15?-1:0;
+    return lockRanges({contrast},rec.temp,depth,hueCue);
   };
 
   const swatches=colors=>`<div class="quiz-swatch-row" aria-hidden="true">${colors.map(color=>`<i class="quiz-swatch" style="background:${color}"></i>`).join('')}</div>`;
@@ -46,46 +64,46 @@
         <label class="setup-card"><input type="checkbox" name="noHeavyMakeup" checked><span><b>Minimal color correction</b><span class="desc">No heavy makeup or artificial tan.</span></span></label>
         <label class="setup-card"><input type="checkbox" name="naturalHair" checked><span><b>Natural coloring visible</b><span class="desc">Roots, brows, or natural hair are visible.</span></span></label>
       </div></div>`),
-      section(2,'Drape tests','Compare simple props near the face to establish warm, cool, or balanced coloring.',`<div class="field"><div class="field-title">White or cream <span>pick one</span></div><p class="how">Hold white near the face, then cream. Which makes the face look clearer and healthier?</p><div class="choices">
-        ${choice('whiteCream','cool','White wins','White looks fresh; cream looks yellow or heavy.',['#ffffff','#f4f6fb','#dfe7f5'],true)}
+      section(2,'Drape tests','Use these only as a cross-check for Tinter, or as the main test when camera access is unavailable.',`<div class="field"><div class="field-title">White or cream <span>pick one</span></div><p class="how">Hold white near the face, then cream. Which makes the face look clearer and healthier?</p><div class="choices">
+        ${choice('whiteCream','cool','White wins','White looks fresh; cream looks yellow or heavy.',['#ffffff','#f4f6fb','#dfe7f5'])}
         ${choice('whiteCream','warm','Cream wins','Cream looks rich; white looks stark or gray.',['#fff4df','#efdfc3','#d8ba8d'])}
-        ${choice('whiteCream','neutral','Both work','The difference is small or both look natural.',['#ffffff','#f2e7d5','#d9d5ce'])}
-      </div><div class="confidence">${range({name:'whiteConfidence',title:'How clear was the difference?',description:'Move right only when one option clearly wins.',left:'Subtle',middle:'Clear',right:'Obvious',value:55,visual:confidenceEmojis()})}</div></div>
+        ${choice('whiteCream','neutral','Both work','The difference is small or both look natural.',['#ffffff','#f2e7d5','#d9d5ce'],true)}
+      </div><div class="confidence">${range({name:'whiteConfidence',title:'How clear was the difference?',description:'Move right only when one option clearly wins.',left:'Subtle',middle:'Clear',right:'Obvious',value:35,visual:confidenceEmojis()})}</div></div>
       <div class="field"><div class="field-title">Silver or gold <span>pick one</span></div><p class="how">Compare silver and gold near the face. Which looks smoother and more natural?</p><div class="choices">
-        ${choice('jewelry','cool','Silver wins','Silver or pewter looks cleaner.',['#f7f7f5','#c9d0d4','#8f979d'],true)}
+        ${choice('jewelry','cool','Silver wins','Silver or pewter looks cleaner.',['#f7f7f5','#c9d0d4','#8f979d'])}
         ${choice('jewelry','warm','Gold wins','Gold or bronze looks warmer.',['#ead9a4','#c7a356','#8a6335'])}
-        ${choice('jewelry','neutral','Both work','Both metals look natural.',['#c9d0d4','#c8ae70','#9aa0a4'])}
-      </div><div class="confidence">${range({name:'metalConfidence',title:'How clear was the difference?',description:'Move right only when one metal clearly wins.',left:'Subtle',middle:'Clear',right:'Obvious',value:55,visual:confidenceEmojis()})}</div></div>`),
+        ${choice('jewelry','neutral','Both work','Both metals look natural.',['#c9d0d4','#c8ae70','#9aa0a4'],true)}
+      </div><div class="confidence">${range({name:'metalConfidence',title:'How clear was the difference?',description:'Move right only when one metal clearly wins.',left:'Subtle',middle:'Clear',right:'Obvious',value:35,visual:confidenceEmojis()})}</div></div>`),
       section(3,'Feature depth','Set the light-to-dark weight of the face before judging color strength.',`<div class="field"><div class="field-title">Skin, hair, and eyes <span>sliders</span></div><p class="how">Judge overall lightness or depth, not ethnicity or undertone.</p>
         ${range({name:'skinDepth',title:'Skin light/dark level',description:'Compare the skin with the hair and eyes.',left:'Light',middle:'Medium',right:'Deep',visual:swatches(['#f4dfd2','#d8ad8f','#a56f52','#6a3f2f','#2f1d17'])})}
         ${range({name:'hairDepth',title:'Hair light/dark level',description:'Use roots, brows, or the most natural section.',left:'Light',middle:'Medium',right:'Deep',visual:swatches(['#f3dfad','#b9854f','#6f452e','#2d211b','#0e0e0d'])})}
         ${range({name:'eyeDepth',title:'Eye light/dark level',description:'Judge the overall visual weight of the eyes.',left:'Light',middle:'Medium',right:'Deep',visual:swatches(['#b7d1d1','#98a471','#7a5a35','#3a2920','#151414'])})}
       </div><div class="field"><div class="field-title">Face contrast <span>slider</span></div>${range({name:'contrastDepth',title:'Light/dark contrast',description:'Compare the lightest and darkest natural features.',left:'Soft',middle:'Balanced',right:'Sharp',visual:contrastExamples()})}</div>`),
-      section(4,'Color clues','Use visible hair shine and eye flecks as supporting evidence, not the main decision.',`<div class="field"><p class="mini-question color-clue-heading">Hair shine<span class="mini-help">Look for the reflection in natural hair, roots, or brows.</span></p><div class="choices">
-        ${choice('hairHue','cool','Ash / smoke','The reflection reads gray, smoky, or cool.',['#8a8580','#5d6370','#25313d'],true)}
+      section(4,'Color clues','Use hair shine and eye flecks as supporting evidence rather than a deciding rule.',`<div class="field"><p class="mini-question color-clue-heading">Hair shine<span class="mini-help">Look for the reflection in natural hair, roots, or brows.</span></p><div class="choices">
+        ${choice('hairHue','cool','Ash / smoke','The reflection reads gray, smoky, or cool.',['#8a8580','#5d6370','#25313d'])}
         ${choice('hairHue','warm','Gold / copper','The reflection reads gold, copper, or red-brown.',['#c28a45','#9b4d32','#70442d'])}
-        ${choice('hairHue','neutral','Hard to tell','There is no clear warm or cool reflection.',['#8b7562','#625b53','#746b62'])}
+        ${choice('hairHue','neutral','Hard to tell','There is no clear warm or cool reflection.',['#8b7562','#625b53','#746b62'],true)}
       </div><p class="mini-question color-clue-heading">Eye flecks<span class="mini-help">Look for the strongest flecks, ring, or overall cast.</span></p><div class="choices">
-        ${choice('eyeHue','cool','Cool flecks','Blue, slate, gray, or cool green.',['#7b9db4','#536575','#416b5a'],true)}
+        ${choice('eyeHue','cool','Cool flecks','Blue, slate, gray, or cool green.',['#7b9db4','#536575','#416b5a'])}
         ${choice('eyeHue','warm','Warm flecks','Gold, amber, copper, or olive.',['#a9783e','#7f753b','#b08a4e'])}
-        ${choice('eyeHue','neutral','Mixed / quiet','The signals are mixed or subtle.',['#687064','#7a5c3d','#607b87'])}
+        ${choice('eyeHue','neutral','Mixed / quiet','The signals are mixed or subtle.',['#687064','#7a5c3d','#607b87'],true)}
       </div></div>`)
     ].join('');
   }
 
-  window.calculateReport=function(){
+  function calculateObservationReport(){
     const values=Object.fromEntries(new FormData(q('#quiz')).entries());
-    const whiteConfidence=Number(values.whiteConfidence||50);
-    const metalConfidence=Number(values.metalConfidence||50);
+    const whiteConfidence=Number(values.whiteConfidence||35);
+    const metalConfidence=Number(values.metalConfidence||35);
     let warmth=0,hueCue=0;
-    if(values.whiteCream==='warm')warmth+=18+whiteConfidence*.35;
-    if(values.whiteCream==='cool')warmth-=18+whiteConfidence*.35;
-    if(values.jewelry==='warm')warmth+=14+metalConfidence*.28;
-    if(values.jewelry==='cool')warmth-=14+metalConfidence*.28;
-    if(values.hairHue==='warm'){warmth+=14;hueCue++}
-    if(values.hairHue==='cool'){warmth-=14;hueCue--}
-    if(values.eyeHue==='warm'){warmth+=14;hueCue++}
-    if(values.eyeHue==='cool'){warmth-=14;hueCue--}
+    if(values.whiteCream==='warm')warmth+=12+whiteConfidence*.28;
+    if(values.whiteCream==='cool')warmth-=12+whiteConfidence*.28;
+    if(values.jewelry==='warm')warmth+=10+metalConfidence*.23;
+    if(values.jewelry==='cool')warmth-=10+metalConfidence*.23;
+    if(values.hairHue==='warm'){warmth+=12;hueCue++}
+    if(values.hairHue==='cool'){warmth-=12;hueCue--}
+    if(values.eyeHue==='warm'){warmth+=12;hueCue++}
+    if(values.eyeHue==='cool'){warmth-=12;hueCue--}
     warmth=clampValue(warmth);
 
     const skin=Number(values.skinDepth||50),hair=Number(values.hairDepth||50),eyes=Number(values.eyeDepth||50);
@@ -96,18 +114,41 @@
     const rec={
       temp:warmth,
       value:clampValue(-70*depth),
-      chroma:clampValue((contrast-50)*1.05+6),
-      def:clampValue((contrast-50)*1.15+6),
-      hue:hueCue>0?55:hueCue<0?-55:0
+      chroma:clampValue((contrast-50)*.95+4),
+      def:clampValue((contrast-50)*1.05+4),
+      hue:hueCue>0?45:hueCue<0?-45:0
     };
     const locks=lockRanges({contrast:contrastWord},warmth,depth,hueCue);
     Object.keys(rec).forEach(key=>rec[key]=clampValue(clamp(rec[key],locks[key][0],locks[key][1])));
-    const direction=[warmth>22?'Warm':warmth<-22?'Cool':'Balanced',depth>.33?'Deep':depth<-.33?'Light':'Medium',rec.def>20?'Defined':rec.def<-20?'Soft':'Tailored'].join(' ');
-    return {client:values.client?.trim()||'Client',direction,rec,alt:{...rec},locks,confidence:{white:whiteConfidence,metal:metalConfidence}};
+    return {client:values.client?.trim()||'Client',direction:directionFromRec(rec),rec,alt:{...rec},locks,confidence:{white:whiteConfidence,metal:metalConfidence},source:'intake'};
+  }
+
+  window.calculateObservationReport=calculateObservationReport;
+  window.calculateReport=function(){
+    const observation=calculateObservationReport();
+    const tinter=window.Tinter?.result;
+    if(!tinter)return observation;
+
+    const report=clone(tinter);
+    report.client=observation.client;
+    report.rec={...tinter.rec};
+    if(Refinement.enabled){
+      const weights={temp:.20,value:.30,chroma:.25,def:.25,hue:.20};
+      Object.keys(weights).forEach(key=>{
+        const weight=weights[key];
+        report.rec[key]=clampValue(tinter.rec[key]*(1-weight)+observation.rec[key]*weight);
+      });
+      report.refined=true;
+    }
+    report.alt={...report.rec};
+    report.direction=directionFromRec(report.rec);
+    report.locks=locksFromRec(report.rec);
+    report.source=Refinement.enabled?'tinter+refinement':'tinter';
+    return report;
   };
 
-  function handleRange(e){
-    const input=e.target.closest('input[type="range"][data-output]');
+  function handleRange(event){
+    const input=event.target.closest('input[type="range"][data-output]');
     if(!input)return;
     const output=q(`#${input.dataset.output}`);
     if(output)output.value=input.value;
