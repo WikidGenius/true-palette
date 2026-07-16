@@ -21,15 +21,47 @@
     document.body.classList.remove('dock-open');
   };
 
+  function evidenceHtml(report){
+    const evidence=report.tinter?.evidence?.length?report.tinter.evidence:[
+      'Built from the camera-free observations.',
+      'The result uses warmth, depth, color strength, and contrast together.'
+    ];
+    return `<ul>${evidence.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  }
+
+  function outfitsHtml(report){
+    return `<div class="outfit-combos">${outfitCombinations(report).map(combo=>`<div class="outfit-combo"><span class="combo-dots">${combo.map(color=>`<i style="background:${color[1]}"></i>`).join('')}</span><span>${combo.map(color=>escapeHtml(color[0])).join(' + ')}</span></div>`).join('')}</div>`;
+  }
+
   window.renderReport=function(report){
     state.last=report;
     state.adjusted=false;
     closeDock();
-    const client=report.client&&report.client!=='Client'?report.client:'Unnamed Client';
+    const named=report.client&&report.client!=='Client';
+    const confidence=reportConfidence(report);
     const result=q('#result');
     result.className='style-report-card';
-    result.innerHTML=`<section id="styleReportCard" class="report-shell"><div class="report-mast"><p class="report-client-label">Client</p><p class="report-client">${escapeHtml(client)}</p><h2 class="report-palette">${escapeHtml(seasonName(report))}</h2><p class="report-desc">${escapeHtml(styleReportText(report))}</p><div class="report-pills"><span class="pill">${escapeHtml(report.direction)}</span><span class="pill">True Palette Atelier</span></div></div><p class="report-palette-title">Wardrobe palette</p><div id="paletteCompare">${paletteCompareHtml(paletteFromValues(report.rec),paletteFromValues(report.alt),false)}</div></section><button type="button" id="openDock" class="secondary adjust-palette">Adjust palette</button>`;
+    result.innerHTML=`<section id="styleReportCard" class="report-shell">
+      <div class="report-mast">
+        <p class="report-client-label">${named?'Palette for':'Your color direction'}</p>
+        <p class="report-client">${named?escapeHtml(report.client):escapeHtml(profileWords(report))}</p>
+        <h2 class="report-palette">${escapeHtml(seasonName(report))}</h2>
+        <p class="report-desc">${escapeHtml(styleReportText(report))}</p>
+        <div class="report-confidence"><span class="confidence-badge">${escapeHtml(confidence.label)}</span>${report.tinter?.comparisons?`<span class="confidence-badge">${report.tinter.comparisons} comparisons</span>`:''}${report.refined?'<span class="confidence-badge">Refined with observations</span>':''}</div>
+      </div>
+      <div class="report-insight-grid">
+        <section class="report-insight"><h3>Why this result</h3>${evidenceHtml(report)}<p class="muted">${escapeHtml(confidence.description)}</p></section>
+        <section class="report-insight"><h3>Easy outfit combinations</h3>${outfitsHtml(report)}</section>
+        <section class="report-insight report-insight-wide"><h3>Use more carefully near the face</h3><ul>${cautionColors(report).map(color=>`<li>${escapeHtml(color)}</li>`).join('')}</ul></section>
+      </div>
+      <p class="report-palette-title">Wardrobe palette</p>
+      <div id="paletteCompare">${paletteCompareHtml(paletteFromValues(report.rec),paletteFromValues(report.alt),false)}</div>
+    </section>
+    <div class="report-followup"><button type="button" id="refineResult" class="secondary">Refine result</button><button type="button" id="retakeTinter" class="secondary">${report.tinter?'Retake Tinter':'Try Tinter'}</button></div>
+    <button type="button" id="openDock" class="secondary adjust-palette">Adjust palette</button>`;
     q('#openDock').onclick=()=>renderDock(report);
+    q('#refineResult').onclick=()=>openRefinement?.({cameraFree:false});
+    q('#retakeTinter').onclick=()=>window.Tinter?.open();
   };
 
   window.sliderCardHtml=function(definition){
