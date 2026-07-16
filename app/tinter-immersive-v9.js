@@ -38,14 +38,23 @@
     const hint=document.createElement('p');
     hint.id='tinterGestureHint';
     hint.className='tinter-gesture-hint';
-    hint.textContent='Tap a card or swipe it upward';
     stage.appendChild(hint);
 
     const prompt=q('#tinterPrompt');
     if(prompt){
       const updateHint=()=>{
         const step=prompt.querySelector('.tinter-step-count')?.textContent||'';
-        hint.hidden=!/^(?:question\s+)?1\b/i.test(step.trim());
+        const match=step.trim().match(/^(?:question\s+)?(\d+)\b/i);
+        const number=Number(match?.[1]||0);
+        if(number===1){
+          hint.textContent='Use “They look about the same” for this practice round';
+          hint.hidden=false;
+        }else if(number===2){
+          hint.textContent='Tap a card or swipe it upward';
+          hint.hidden=false;
+        }else{
+          hint.hidden=true;
+        }
       };
       const observer=new MutationObserver(updateHint);
       observer.observe(prompt,{childList:true,subtree:true,characterData:true});
