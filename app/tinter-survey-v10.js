@@ -97,76 +97,41 @@
   };
 
   const BRANCHES={
-    temp:{
-      positive:[
-        question('temp-warm-challenge-1','challenge','temp','Pattern check','Which of these close neutrals gives your face a more polished finish?',
-          color('Warm Taupe','#a58e79',{temp:11}),color('Rose Greige','#a89a98',{temp:-6}),{weight:1.15}),
-        question('temp-warm-challenge-2','final','temp','Final temperature check','Which muted color keeps the complexion calmer?',
-          color('Rusted Rose','#9b5d55',{temp:10,hue:4}),color('Mauvewood','#927985',{temp:-7,hue:-3}),{weight:1.2})
-      ],
-      negative:[
-        question('temp-cool-challenge-1','challenge','temp','Pattern check','Which of these close neutrals makes the skin look more balanced?',
-          color('Mushroom Cream','#d8cec2',{temp:6}),color('Pearl Gray','#d5d8d8',{temp:-11}),{weight:1.15}),
-        question('temp-cool-challenge-2','final','temp','Final temperature check','Which muted color gives the face a cleaner finish?',
-          color('Soft Olive','#85856c',{temp:7}),color('Blue Spruce','#567477',{temp:-10,hue:-4}),{weight:1.2})
-      ]
-    },
-    value:{
-      positive:[
-        question('value-light-challenge-1','challenge','value','Pattern check','Which mid-light neutral keeps the face looking fresher?',
-          color('Cafe au Lait','#d0bba2',{value:11}),color('Ink Taupe','#655952',{value:-6}),{weight:1.15}),
-        question('value-light-challenge-2','final','value','Final depth check','Which depth keeps the eyes visible without weighing down the face?',
-          color('Soft Slate','#8b959f',{value:9}),color('Slate Navy','#445468',{value:-9}),{weight:1.2})
-      ],
-      negative:[
-        question('value-deep-challenge-1','challenge','value','Pattern check','Which grounded neutral gives your features more presence?',
-          color('Light Camel','#c0996f',{value:7}),color('Walnut','#6f4b34',{value:-11}),{weight:1.15}),
-        question('value-deep-challenge-2','final','value','Final depth check','Which anchor makes the complexion look more composed?',
-          color('Dusty Sky','#95aeb7',{value:8}),color('Ink Blue','#24364e',{value:-12}),{weight:1.2})
-      ]
-    },
-    chroma:{
-      positive:[
-        question('chroma-clear-challenge-1','challenge','chroma','Pattern check','Which color keeps its energy without overpowering your face?',
-          color('Dusty Teal','#6f9190',{chroma:-6}),color('Peacock Teal','#1f5f65',{chroma:11}),{weight:1.15}),
-        question('chroma-clear-challenge-2','final','chroma','Final intensity check','Which rose makes the features look more alive?',
-          color('Clay Pink','#b98578',{chroma:-6}),color('Cherry Rose','#a84655',{chroma:11,def:3}),{weight:1.2})
-      ],
-      negative:[
-        question('chroma-soft-challenge-1','challenge','chroma','Pattern check','Which softened color looks more refined beside your face?',
-          color('Sage Gray','#8a9870',{chroma:-11}),color('Pine','#315846',{chroma:7}),{weight:1.15}),
-        question('chroma-soft-challenge-2','final','chroma','Final intensity check','Which rose keeps the complexion looking smoother?',
-          color('Dusty Rose','#b88691',{chroma:-11}),color('Oxblood','#7b3540',{chroma:7,def:3}),{weight:1.2})
-      ]
-    },
-    def:{
-      positive:[
-        question('def-sharp-challenge-1','challenge','def','Pattern check','Which contrast level gives the face cleaner structure?',
-          color('Mushroom Charcoal','#5a534f',{def:-6}),color('Ink Navy','#17263a',{def:11}),{weight:1.15}),
-        question('def-sharp-challenge-2','final','def','Final contrast check','Which option makes the eyes, brows, and jawline look more connected?',
-          color('Mauvewood','#9a7884',{def:-6}),color('Sapphire Ink','#24395f',{def:11}),{weight:1.2})
-      ],
-      negative:[
-        question('def-soft-challenge-1','challenge','def','Pattern check','Which contrast level looks smoother and more expensive?',
-          color('Warm Taupe','#9b8d7c',{def:-11}),color('Charcoal','#343940',{def:7}),{weight:1.15}),
-        question('def-soft-challenge-2','final','def','Final contrast check','Which option softens shadows without making the face disappear?',
-          color('Rose Taupe','#9a7f7f',{def:-10}),color('Black Navy','#1f2b3a',{def:7}),{weight:1.2})
-      ]
-    },
-    hue:{
-      positive:[
-        question('hue-warm-challenge-1','challenge','hue','Pattern check','Which accent looks more naturally echoed in your features?',
-          color('Rosewood','#7f4e55',{hue:8,temp:3}),color('Petrol','#315b61',{hue:-6,temp:-2}),{weight:1.15}),
-        question('hue-warm-challenge-2','final','hue','Final accent check','Which finish gives the complexion a healthier glow?',
-          color('Aged Brass','#a68738',{hue:10,temp:4}),color('Pewter Silver','#aab1b4',{hue:-7,temp:-3}),{weight:1.2})
-      ],
-      negative:[
-        question('hue-cool-challenge-1','challenge','hue','Pattern check','Which accent feels more naturally connected to the eyes?',
-          color('Rosewood','#875d63',{hue:6,temp:2}),color('Petrol','#244f57',{hue:-9,temp:-3}),{weight:1.15}),
-        question('hue-cool-challenge-2','final','hue','Final accent check','Which finish looks cleaner against the skin?',
-          color('Soft Gold','#b99d68',{hue:7,temp:3}),color('Brushed Silver','#c9d0d4',{hue:-10,temp:-4}),{weight:1.2})
-      ]
-    }
+    temp:{positive:[
+      question('temp-warm-challenge-1','challenge','temp','Pattern check','Which of these close neutrals gives your face a more polished finish?',color('Warm Taupe','#a58e79',{temp:11}),color('Rose Greige','#a89a98',{temp:-6}),{weight:1.15}),
+      question('temp-warm-challenge-2','final','temp','Final temperature check','Which muted color keeps the complexion calmer?',color('Rusted Rose','#9b5d55',{temp:10,hue:4}),color('Mauvewood','#927985',{temp:-7,hue:-3}),{weight:1.2})
+    ],negative:[
+      question('temp-cool-challenge-1','challenge','temp','Pattern check','Which of these close neutrals makes the skin look more balanced?',color('Mushroom Cream','#d8cec2',{temp:6}),color('Pearl Gray','#d5d8d8',{temp:-11}),{weight:1.15}),
+      question('temp-cool-challenge-2','final','temp','Final temperature check','Which muted color gives the face a cleaner finish?',color('Soft Olive','#85856c',{temp:7}),color('Blue Spruce','#567477',{temp:-10,hue:-4}),{weight:1.2})
+    ]},
+    value:{positive:[
+      question('value-light-challenge-1','challenge','value','Pattern check','Which mid-light neutral keeps the face looking fresher?',color('Cafe au Lait','#d0bba2',{value:11}),color('Ink Taupe','#655952',{value:-6}),{weight:1.15}),
+      question('value-light-challenge-2','final','value','Final depth check','Which depth keeps the eyes visible without weighing down the face?',color('Soft Slate','#8b959f',{value:9}),color('Slate Navy','#445468',{value:-9}),{weight:1.2})
+    ],negative:[
+      question('value-deep-challenge-1','challenge','value','Pattern check','Which grounded neutral gives your features more presence?',color('Light Camel','#c0996f',{value:7}),color('Walnut','#6f4b34',{value:-11}),{weight:1.15}),
+      question('value-deep-challenge-2','final','value','Final depth check','Which anchor makes the complexion look more composed?',color('Dusty Sky','#95aeb7',{value:8}),color('Ink Blue','#24364e',{value:-12}),{weight:1.2})
+    ]},
+    chroma:{positive:[
+      question('chroma-clear-challenge-1','challenge','chroma','Pattern check','Which color keeps its energy without overpowering your face?',color('Dusty Teal','#6f9190',{chroma:-6}),color('Peacock Teal','#1f5f65',{chroma:11}),{weight:1.15}),
+      question('chroma-clear-challenge-2','final','chroma','Final intensity check','Which rose makes the features look more alive?',color('Clay Pink','#b98578',{chroma:-6}),color('Cherry Rose','#a84655',{chroma:11,def:3}),{weight:1.2})
+    ],negative:[
+      question('chroma-soft-challenge-1','challenge','chroma','Pattern check','Which softened color looks more refined beside your face?',color('Sage Gray','#8a9870',{chroma:-11}),color('Pine','#315846',{chroma:7}),{weight:1.15}),
+      question('chroma-soft-challenge-2','final','chroma','Final intensity check','Which rose keeps the complexion looking smoother?',color('Dusty Rose','#b88691',{chroma:-11}),color('Oxblood','#7b3540',{chroma:7,def:3}),{weight:1.2})
+    ]},
+    def:{positive:[
+      question('def-sharp-challenge-1','challenge','def','Pattern check','Which contrast level gives the face cleaner structure?',color('Mushroom Charcoal','#5a534f',{def:-6}),color('Ink Navy','#17263a',{def:11}),{weight:1.15}),
+      question('def-sharp-challenge-2','final','def','Final contrast check','Which option makes the eyes, brows, and jawline look more connected?',color('Mauvewood','#9a7884',{def:-6}),color('Sapphire Ink','#24395f',{def:11}),{weight:1.2})
+    ],negative:[
+      question('def-soft-challenge-1','challenge','def','Pattern check','Which contrast level looks smoother and more expensive?',color('Warm Taupe','#9b8d7c',{def:-11}),color('Charcoal','#343940',{def:7}),{weight:1.15}),
+      question('def-soft-challenge-2','final','def','Final contrast check','Which option softens shadows without making the face disappear?',color('Rose Taupe','#9a7f7f',{def:-10}),color('Black Navy','#1f2b3a',{def:7}),{weight:1.2})
+    ]},
+    hue:{positive:[
+      question('hue-warm-challenge-1','challenge','hue','Pattern check','Which accent looks more naturally echoed in your features?',color('Rosewood','#7f4e55',{hue:8,temp:3}),color('Petrol','#315b61',{hue:-6,temp:-2}),{weight:1.15}),
+      question('hue-warm-challenge-2','final','hue','Final accent check','Which finish gives the complexion a healthier glow?',color('Aged Brass','#a68738',{hue:10,temp:4}),color('Pewter Silver','#aab1b4',{hue:-7,temp:-3}),{weight:1.2})
+    ],negative:[
+      question('hue-cool-challenge-1','challenge','hue','Pattern check','Which accent feels more naturally connected to the eyes?',color('Rosewood','#875d63',{hue:6,temp:2}),color('Petrol','#244f57',{hue:-9,temp:-3}),{weight:1.15}),
+      question('hue-cool-challenge-2','final','hue','Final accent check','Which finish looks cleaner against the skin?',color('Soft Gold','#b99d68',{hue:7,temp:3}),color('Brushed Silver','#c9d0d4',{hue:-10,temp:-4}),{weight:1.2})
+    ]}
   };
 
   function orient(definition,random=Math.random){
@@ -216,7 +181,8 @@
       const ratio=evidence[axis]>0?Math.abs(scores[axis]/evidence[axis]):0;
       const consistency=decisive?Math.abs(sum)/decisive:0;
       const coverage=Math.min(1,votes.length/2);
-      const confidence=clamp((ratio*.52+consistency*.38+coverage*.10)*(1-Math.min(.45,ties*.12)),0,1);
+      const signal=ratio*.58+consistency*.42;
+      const confidence=clamp(signal*coverage*(1-Math.min(.45,ties*.12)),0,1);
       const direction=Math.sign(scores[axis]||sum);
       return [axis,{axis,count:votes.length,ties,sum,ratio,consistency,coverage,confidence,direction}];
     }));
@@ -306,7 +272,9 @@
   function normalizeScores(scores,evidence){
     return Object.fromEntries(AXES.map(axis=>{
       const ratio=evidence[axis]>0?scores[axis]/evidence[axis]:0;
-      return [axis,Math.round(clamp(ratio*82,-92,92))];
+      const support=Math.min(1,evidence[axis]/28);
+      const supportWeight=.45+.55*support;
+      return [axis,Math.round(clamp(ratio*82*supportWeight,-92,92))];
     }));
   }
 
@@ -322,7 +290,7 @@
     const held=challenges.filter(response=>response.vote===response.predictedSign).length;
     const contradicted=challenges.filter(response=>response.vote!==0&&response.vote!==response.predictedSign).length;
     const challengeConsistency=challenges.length?held/challenges.length:1;
-    const score=clamp(1-(1-calibrationScore)*.24-fastRate*.20-sideBias*.16-(challenges.length?contradicted/challenges.length*.18:0),0,1);
+    const score=clamp(1-(1-calibrationScore)*.42-fastRate*.18-sideBias*.14-(challenges.length?contradicted/challenges.length*.18:0),0,1);
     return {score,calibrationScore,fastRate,sideBias,challengeConsistency,held,contradicted,challengeCount:challenges.length};
   }
 
@@ -330,7 +298,7 @@
     const covered=Object.values(stats).filter(stat=>stat.count);
     const axisAverage=covered.length?covered.reduce((sum,stat)=>sum+stat.confidence,0)/covered.length:0;
     const combined=axisAverage*.76+quality.score*.24;
-    if(combined>=.68&&quality.score>=.68)return {key:'high',label:'High confidence',description:'Your pattern stayed consistent through calibration and the closer adaptive checks.'};
+    if(combined>=.68&&quality.score>=.68&&quality.calibrationScore===1)return {key:'high',label:'High confidence',description:'Your pattern stayed consistent through calibration and the closer adaptive checks.'};
     if(combined>=.44)return {key:'moderate',label:'Moderate confidence',description:'Several preferences were clear, while one or two dimensions remained close.'};
     return {key:'mixed',label:'Balanced / exploratory result',description:'Your responses were mixed or several comparisons were genuinely close, so the palette stays flexible.'};
   }
