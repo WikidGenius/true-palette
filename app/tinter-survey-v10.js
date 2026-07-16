@@ -185,7 +185,11 @@
   function scoreResponse(item,choice,lightingConfidence='good'){
     const delta=Object.fromEntries(AXES.map(axis=>[axis,0]));
     const evidence=Object.fromEntries(AXES.map(axis=>[axis,0]));
-    if(item.control)return {delta,evidence,vote:0,selected:null,rejected:null};
+    if(item.control){
+      const selected=choice?item[choice]:null;
+      const rejected=choice?item[choice==='left'?'right':'left']:null;
+      return {delta,evidence,vote:choice?(choice==='left'?1:-1):0,selected,rejected};
+    }
     const lightWeight=lightingConfidence==='low'?.72:lightingConfidence==='okay'?.88:1;
     if(!choice){
       if(item.axis)evidence[item.axis]=6*item.weight*lightWeight;
