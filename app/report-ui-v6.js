@@ -58,7 +58,12 @@
     const badges=[];
     if(tinter.comparisons)badges.push(`${tinter.comparisons} survey rounds`);
     if(tinter.adaptiveQuestions)badges.push(`${tinter.adaptiveQuestions} adaptive checks`);
-    if(typeof tinter.calibrationPassed==='boolean')badges.push(tinter.calibrationPassed?'Calibration passed':'Calibration mixed');
+    const calibrationScore=tinter.surveyQuality?.calibrationScore;
+    if(Number.isFinite(calibrationScore)){
+      badges.push(calibrationScore===1?'Calibration passed':calibrationScore>0?'Calibration mixed':'Calibration missed');
+    }else if(typeof tinter.calibrationPassed==='boolean'){
+      badges.push(tinter.calibrationPassed?'Calibration passed':'Calibration mixed');
+    }
     return badges.map(label=>`<span class="confidence-badge">${escapeHtml(label)}</span>`).join('');
   }
 
