@@ -45,7 +45,7 @@
     if(prompt){
       const updateHint=()=>{
         const step=prompt.querySelector('.tinter-step-count')?.textContent||'';
-        hint.hidden=!/^1\s+of\s+/i.test(step.trim());
+        hint.hidden=!/^(?:question\s+)?1\b/i.test(step.trim());
       };
       const observer=new MutationObserver(updateHint);
       observer.observe(prompt,{childList:true,subtree:true,characterData:true});
@@ -87,6 +87,9 @@
 
     window.visualViewport?.addEventListener('resize',syncViewport,{passive:true});
     window.addEventListener('orientationchange',()=>window.setTimeout(syncViewport,120),{passive:true});
+    window.addEventListener('pagehide',()=>{
+      if(!q('#tinterModal')?.hidden)Tinter.close();
+    });
     document.addEventListener('keydown',event=>{
       if(event.key==='Escape'&&!q('#tinterModal')?.hidden)Tinter.close();
     });
