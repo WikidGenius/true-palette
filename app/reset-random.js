@@ -4,15 +4,15 @@
   const q=s=>document.querySelector(s);
 
   function resetTinter(){
-    if(window.Tinter?.reset)Tinter.reset();
-    else if(window.Tinter?.stream){Tinter.stream.getTracks().forEach(track=>track.stop());Tinter.stream=null}
+    if(window.Tinter?.reset)window.Tinter.reset();
+    else if(window.Tinter?.stream){window.Tinter.stream.getTracks().forEach(track=>track.stop());window.Tinter.stream=null}
     const modal=q('#tinterModal');
     if(modal)modal.hidden=true;
   }
 
   function clearReport(){
-    if(window.state){state.last=null;state.adjusted=false}
-    if(typeof closeDock==='function')closeDock();
+    if(window.state){window.state.last=null;window.state.adjusted=false}
+    if(typeof window.closeDock==='function')window.closeDock();
     const result=q('#result');
     if(result){result.className='empty';result.innerHTML='Complete Tinter to create your wardrobe palette.'}
     const copy=q('#copy');
@@ -29,10 +29,10 @@
   }
 
   function clearQuiz(){
-    if(typeof renderIntake==='function')renderIntake();
+    if(typeof window.renderIntake==='function')window.renderIntake();
     const client=q('#client');
     if(client)client.value='';
-    disableRefinement?.();
+    window.disableRefinement?.();
     resetTinter();
     clearReport();
     hideRefinement();
@@ -40,7 +40,7 @@
   }
 
   function randomizeQuiz(){
-    if(typeof renderIntake==='function')renderIntake();
+    if(typeof window.renderIntake==='function')window.renderIntake();
     const section=q('#refineSection');
     const details=q('#refineDetails');
     if(section)section.hidden=false;
@@ -59,7 +59,7 @@
       const output=q(`#${input.name}Val`);
       if(output)output.value=value;
     });
-    disableRefinement?.();
+    window.disableRefinement?.();
     resetTinter();
     clearReport();
   }
