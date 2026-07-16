@@ -22,8 +22,11 @@
   };
 
   function evidenceItems(report){
-    const answers=report.tinter?.answers;
-    if(!answers?.length){
+    const prepared=report.tinter?.evidence;
+    if(Array.isArray(prepared)&&prepared.length)return prepared.slice(0,5);
+
+    const answers=(report.tinter?.answers||[]).filter(answer=>answer.axis&&!answer.control);
+    if(!answers.length){
       return [
         'Built from the camera-free observations.',
         'The result combines warmth, depth, color strength, and contrast.'
@@ -49,6 +52,16 @@
     return `<div class="outfit-combos">${window.outfitCombinations(report).map(combo=>`<div class="outfit-combo"><span class="combo-dots">${combo.map(color=>`<i style="background:${color[1]}"></i>`).join('')}</span><span>${combo.map(color=>escapeHtml(color[0])).join(' + ')}</span></div>`).join('')}</div>`;
   }
 
+  function surveyBadges(report){
+    const tinter=report.tinter;
+    if(!tinter)return '';
+    const badges=[];
+    if(tinter.comparisons)badges.push(`${tinter.comparisons} survey rounds`);
+    if(tinter.adaptiveQuestions)badges.push(`${tinter.adaptiveQuestions} adaptive checks`);
+    if(typeof tinter.calibrationPassed==='boolean')badges.push(tinter.calibrationPassed?'Calibration passed':'Calibration mixed');
+    return badges.map(label=>`<span class="confidence-badge">${escapeHtml(label)}</span>`).join('');
+  }
+
   window.renderReport=function(report){
     window.state.last=report;
     window.state.adjusted=false;
@@ -63,7 +76,7 @@
         <p class="report-client">${named?escapeHtml(report.client):escapeHtml(window.profileWords(report))}</p>
         <h2 class="report-palette">${escapeHtml(window.seasonName(report))}</h2>
         <p class="report-desc">${escapeHtml(window.styleReportText(report))}</p>
-        <div class="report-confidence"><span class="confidence-badge">${escapeHtml(confidence.label)}</span>${report.tinter?.comparisons?`<span class="confidence-badge">${report.tinter.comparisons} comparisons</span>`:''}${report.refined?'<span class="confidence-badge">Refined with observations</span>':''}</div>
+        <div class="report-confidence"><span class="confidence-badge">${escapeHtml(confidence.label)}</span>${surveyBadges(report)}${report.refined?'<span class="confidence-badge">Refined with observations</span>':''}</div>
       </div>
       <div class="report-insight-grid">
         <section class="report-insight"><h3>Why this result</h3>${evidenceHtml(report)}<p class="muted">${escapeHtml(confidence.description)}</p></section>
