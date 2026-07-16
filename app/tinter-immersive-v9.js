@@ -43,11 +43,13 @@
 
     const prompt=q('#tinterPrompt');
     if(prompt){
-      const observer=new MutationObserver(()=>{
+      const updateHint=()=>{
         const step=prompt.querySelector('.tinter-step-count')?.textContent||'';
         hint.hidden=!/^1\s+of\s+/i.test(step.trim());
-      });
+      };
+      const observer=new MutationObserver(updateHint);
       observer.observe(prompt,{childList:true,subtree:true,characterData:true});
+      updateHint();
     }
   }
 
@@ -74,6 +76,11 @@
       unlockPage();
       return result;
     };
+
+    const openButton=q('#tinterOpen');
+    const closeButton=q('#tinterClose');
+    if(openButton)openButton.onclick=Tinter.open;
+    if(closeButton)closeButton.onclick=Tinter.close;
 
     Tinter.__immersivePatched=true;
     installGestureHint();
