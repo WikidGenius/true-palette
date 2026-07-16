@@ -29,13 +29,12 @@
     if(!section)return;
     section.hidden=false;
     if(details)details.open=true;
+    const button=q('#analyze');
     if(cameraFree){
-      disableRefinement?.();
-      const button=q('#analyze');
+      window.disableRefinement?.();
       if(button)button.textContent='Build camera-free palette';
-    }else{
-      const button=q('#analyze');
-      if(button)button.textContent='Apply refinements';
+    }else if(button){
+      button.textContent='Apply refinements';
     }
     window.setTimeout(()=>section.scrollIntoView({behavior:'smooth',block:'start'}),40);
   };
@@ -43,12 +42,12 @@
   function bindActions(){
     const analyze=q('#analyze');
     if(analyze)analyze.onclick=()=>{
-      if(window.Tinter?.result)enableRefinement?.();
+      if(window.Tinter?.result)window.enableRefinement?.();
       window.buildPalette({source:window.Tinter?.result?'refinement':'intake'});
     };
 
     const noCamera=q('#noCamera');
-    if(noCamera)noCamera.onclick=()=>openRefinement({cameraFree:true});
+    if(noCamera)noCamera.onclick=()=>window.openRefinement({cameraFree:true});
 
     const copy=q('#copy');
     if(copy)copy.onclick=async()=>{
