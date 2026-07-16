@@ -30,6 +30,9 @@ for(const axis of survey.AXES){
   assert.ok(Math.abs(left.delta[axis]+right.delta[axis])<1e-9,`left/right scoring must be symmetric for ${axis}`);
 }
 
+const oneAnswerStats=survey.axisStats([{axis:'value',vote:1,control:false}],{temp:0,value:16,chroma:0,def:0,hue:0},{temp:0,value:16,chroma:0,def:0,hue:0});
+assert.ok(oneAnswerStats.value.confidence<=.5,'one answer must not create more than half confidence');
+
 const responses=[
   {axis:'temp',vote:1,control:false},{axis:'temp',vote:1,control:false},
   {axis:'value',vote:0,control:false},{axis:'chroma',vote:1,control:false},
@@ -54,6 +57,9 @@ assert.equal(resolution[0].reason,'contradiction-resolution');
 const normalized=survey.normalizeScores({temp:40,value:-25,chroma:0,def:100,hue:-100},{temp:40,value:50,chroma:10,def:20,hue:20});
 assert.ok(normalized.temp>0&&normalized.value<0,'normalized scores should preserve direction');
 assert.ok(Object.values(normalized).every(value=>value>=-92&&value<=92),'normalized scores should be clamped');
+const lowSupport=survey.normalizeScores({temp:14,value:0,chroma:0,def:0,hue:0},{temp:14,value:0,chroma:0,def:0,hue:0});
+const highSupport=survey.normalizeScores({temp:28,value:0,chroma:0,def:0,hue:0},{temp:28,value:0,chroma:0,def:0,hue:0});
+assert.ok(Math.abs(lowSupport.temp)<Math.abs(highSupport.temp),'corroborating evidence should strengthen the final score');
 
 const reliableResponses=[
   {control:true,expectedTie:true,vote:0,responseMs:1200},
@@ -76,5 +82,10 @@ const weakQuality=survey.reliability([
   {control:false,choice:'left',vote:1,responseMs:190,predictedSign:0}
 ]);
 assert.ok(weakQuality.score<quality.score,'failed calibration and rushed side-biased answers should reduce quality');
+
+const apparentlyStrongStats={
+  temp:{count:2,confidence:1},value:{count:2,confidence:1},chroma:{count:2,confidence:1},def:{count:2,confidence:1},hue:{count:2,confidence:1}
+};
+assert.notEqual(survey.confidenceSummary(apparentlyStrongStats,{score:.75,calibrationScore:0}).key,'high','failed calibration must block high confidence');
 
 console.log('Tinter adaptive survey tests passed.');
