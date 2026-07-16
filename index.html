@@ -23,14 +23,23 @@
 <link rel="stylesheet" href="app/touch-targets.css">
 <link rel="stylesheet" href="app/app-hierarchy.css">
 <link rel="stylesheet" href="app/tinter-first.css">
+<link rel="stylesheet" href="app/tinter-usability-v8.css">
 </head>
 <body class="tinter-first report-waiting">
 <main class="shell">
   <section class="tinter-home" aria-labelledby="homeTitle">
     <div class="tinter-home-copy">
       <p class="kicker">Tinter by True Palette</p>
-      <h1 id="homeTitle">Find the colors that make your face look clearer.</h1>
-      <p class="lead">Compare fabric-inspired color drapes on your live camera. Tinter turns your choices into a practical wardrobe palette.</p>
+      <h1 id="homeTitle">Find the colors that make your skin look more even and your features stand out.</h1>
+      <p class="lead">Compare fabric-inspired colors on your live camera. Choose the color that softens facial shadows, evens the complexion, and brings out the eyes and lips.</p>
+      <div class="tinter-look-for" aria-label="What to look for during Tinter">
+        <b>Watch your face, not the swatches</b>
+        <div class="tinter-look-for-list">
+          <span>More even-looking skin</span>
+          <span>Softer shadows under the eyes and jaw</span>
+          <span>Eyes and lips stand out naturally</span>
+        </div>
+      </div>
       <div class="tinter-home-actions">
         <button type="button" id="tinterOpen" class="tinter-entry tinter-primary" aria-label="Start Tinter color analysis">
           <span class="tinter-logo-lockup"><span class="tinter-style-glyph" aria-hidden="true">style</span><span class="tinter-word">tinter</span></span>
@@ -108,6 +117,7 @@
 <script src="app/report-export-v2.js"></script>
 <script src="app/main.js"></script>
 <script src="app/tinter-runtime-v3.js"></script>
+<script src="app/tinter-usability-v8.js"></script>
 <script src="app/reset-random.js"></script>
 <script src="app/report-visibility.js"></script>
 </body>
