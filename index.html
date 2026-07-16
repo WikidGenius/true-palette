@@ -3,11 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>True Palette Atelier</title>
+<title>Tinter by True Palette</title>
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#f7f1e8">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="True Palette">
+<meta name="apple-mobile-web-app-title" content="Tinter">
 <link rel="apple-touch-icon" href="icons/icon.svg">
 <link rel="stylesheet" href="app/styles.css">
 <link rel="stylesheet" href="app/font-brand.css">
@@ -22,59 +22,66 @@
 <link rel="stylesheet" href="app/tinter-optimized.css">
 <link rel="stylesheet" href="app/touch-targets.css">
 <link rel="stylesheet" href="app/app-hierarchy.css">
+<link rel="stylesheet" href="app/tinter-first.css">
 </head>
-<body class="report-waiting">
+<body class="tinter-first report-waiting">
 <main class="shell">
-  <section class="hero">
-    <div class="panel">
-      <p class="kicker">True Palette Atelier</p>
-      <h1>A fashion-first color fitting.</h1>
-      <p class="lead">Use simple props, answer what you see, and get a wardrobe palette with guided fashion sliders.</p>
+  <section class="tinter-home" aria-labelledby="homeTitle">
+    <div class="tinter-home-copy">
+      <p class="kicker">Tinter by True Palette</p>
+      <h1 id="homeTitle">Find the colors that make your face look clearer.</h1>
+      <p class="lead">Compare fabric-inspired color drapes on your live camera. Tinter turns your choices into a practical wardrobe palette.</p>
+      <div class="tinter-home-actions">
+        <button type="button" id="tinterOpen" class="tinter-entry tinter-primary" aria-label="Start Tinter color analysis">
+          <span class="tinter-logo-lockup"><span class="tinter-style-glyph" aria-hidden="true">style</span><span class="tinter-word">tinter</span></span>
+          <span class="tinter-primary-copy">Find my colors</span>
+        </button>
+        <button type="button" id="noCamera" class="secondary tinter-secondary">Analyze without camera</button>
+      </div>
+      <div class="tinter-trust" aria-label="Tinter details">
+        <span>No photo is saved</span><span>About two minutes</span><span>8–11 comparisons</span>
+      </div>
     </div>
-    <aside class="card">
-      <p class="kicker">Before you start</p>
-      <h2>You will need</h2>
-      <ul class="kit">
-        <li><b>White fabric or plain white paper</b><span class="muted">For the white shirt test.</span></li>
-        <li><b>Cream or ivory fabric</b><span class="muted">To confirm warmth.</span></li>
-        <li><b>Gold and silver metal</b><span class="muted">Jewelry, watch bands, buttons, or hardware work.</span></li>
-        <li><b>Indirect daylight and a mirror</b></li>
-      </ul>
-      <p class="note"><b>Optional confirmers:</b> black, gray, camel, navy, olive, terracotta, berry, or a grayscale selfie.</p>
-    </aside>
+    <div class="tinter-preview" aria-hidden="true">
+      <div class="preview-card"><div class="preview-chip" style="background:#8c5e63"></div><b>Rosewood</b><small>#8C5E63</small></div>
+      <div class="preview-card"><div class="preview-chip" style="background:#405f75"></div><b>Storm Blue</b><small>#405F75</small></div>
+      <div class="preview-card"><div class="preview-chip" style="background:#eadcc8"></div><b>Cream</b><small>#EADCC8</small></div>
+    </div>
   </section>
 
-  <section class="grid">
-    <form id="quiz" class="card">
-      <p class="kicker quiz-card-kicker">Style Intake</p>
-      <h2>Client color observations</h2>
-      <p class="muted">Choose the answer that describes the face, not the fabric or jewelry.</p>
-      <div class="field client-field">
-        <label class="field-title">Client name <span>optional</span></label>
-        <input id="client" name="client" placeholder="Example: Morgan">
-      </div>
-      <div id="questions"></div>
-      <div class="builder-actions">
-        <div class="analysis-action-head">
-          <p class="app-section-kicker">Final analysis</p>
-          <h3 class="app-section-title">Camera drape and palette</h3>
-          <p class="app-section-copy">Complete Tinter, then build the final wardrobe palette.</p>
-        </div>
-        <button type="button" id="analyze" class="primary-build">Build My Palette</button>
-        <button type="button" id="sample" class="secondary">Random Answers</button>
-        <button type="reset" class="secondary">Reset</button>
-      </div>
-    </form>
+  <section class="card report report-area" aria-live="polite">
+    <p class="kicker">Your results</p>
+    <div id="result" class="empty">Complete Tinter to create your wardrobe palette.</div>
+    <div class="actions">
+      <button type="button" id="copy" class="secondary">Copy Style Report</button>
+      <button type="button" id="json" class="secondary">Export JSON</button>
+      <button type="button" onclick="window.print()" class="secondary">Print / PDF</button>
+    </div>
+  </section>
 
-    <aside class="card report">
-      <p class="kicker">Style Report</p>
-      <div id="result" class="empty">Complete the intake, then tap <b>Build My Palette</b>.</div>
-      <div class="actions">
-        <button type="button" id="copy" class="secondary">Copy Style Report</button>
-        <button type="button" id="json" class="secondary">Export JSON</button>
-        <button type="button" onclick="window.print()" class="secondary">Print / PDF</button>
+  <section id="refineSection" class="refine-wrap" hidden>
+    <details id="refineDetails" class="refine-card" open>
+      <summary>
+        <span class="refine-summary-copy"><b>Optional refinement</b><span>Use this when the camera is unavailable or the first palette feels slightly off.</span></span>
+      </summary>
+      <div class="refine-body">
+        <form id="quiz" class="card">
+          <p class="kicker quiz-card-kicker">Refine Result</p>
+          <h2>Color observations</h2>
+          <p class="muted">These observations lightly adjust Tinter rather than replacing it.</p>
+          <div class="field client-field">
+            <label class="field-title">Name <span>optional</span></label>
+            <input id="client" name="client" placeholder="Example: Morgan" autocomplete="name">
+          </div>
+          <div id="questions"></div>
+          <div class="builder-actions">
+            <button type="button" id="analyze" class="primary-build">Apply refinements</button>
+            <button type="button" id="sample" class="secondary">Demo answers</button>
+            <button type="reset" class="secondary">Start over</button>
+          </div>
+        </form>
       </div>
-    </aside>
+    </details>
   </section>
 </main>
 
@@ -88,9 +95,9 @@
   </div>
   <div id="deck" class="deck" aria-label="Fashion slider cards"></div>
   <div class="dock-foot">
-    <button type="button" id="prevCard" class="secondary">‹</button>
+    <button type="button" id="prevCard" class="secondary" aria-label="Previous adjustment">‹</button>
     <div id="dots" class="dots"></div>
-    <button type="button" id="nextCard" class="secondary">›</button>
+    <button type="button" id="nextCard" class="secondary" aria-label="Next adjustment">›</button>
   </div>
 </section>
 
