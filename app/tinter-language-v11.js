@@ -10,6 +10,14 @@
       question:'Which green makes your skin look more even?',
       hint:'Look for less redness, grayness, or yellowing rather than choosing the green you like best.'
     },
+    'main-neutral':{
+      question:'Which neutral distracts less from your face?',
+      hint:'Choose the one that lets your skin, eyes, and brows stay more noticeable than the swatch.'
+    },
+    'contrast-anchor':{
+      question:'Which option makes your eyes, brows, lips, and jawline look clearer?',
+      hint:'Choose stronger contrast only if it sharpens those features without making under-eye or jaw shadows look harsher.'
+    },
     'value-tie-1':{
       question:'Which option keeps your face from looking washed out or weighed down?',
       hint:'The better depth keeps the skin even and the eyes and brows visible.'
@@ -17,6 +25,10 @@
     'value-tie-2':{
       question:'Which depth keeps your eyes and brows easiest to see?',
       hint:'Choose the option that gives the features presence without making shadows look heavier.'
+    },
+    'def-tie-1':{
+      question:'Which option makes your features clearer without making facial shadows harsher?',
+      hint:'Compare the eyes, brows, lips, and jawline. Better contrast adds clarity without emphasizing texture or darkness.'
     },
     'def-tie-2':{
       question:'Which option makes the skin look more even and the eyes and brows more defined?',
