@@ -3,8 +3,10 @@ name: Tinter v11 checks
 on:
   push:
     paths:
+      - 'index.html'
       - 'app/tinter-survey-v11.js'
       - 'app/tinter-runtime-v11.js'
+      - 'app/tinter-runtime-v11-scope-fix.js'
       - 'app/season-hybrid-v11.js'
       - 'app/profile-v11.js'
       - 'app/report-ui-v11.js'
@@ -12,8 +14,10 @@ on:
       - '.github/workflows/tinter-v11.yml'
   pull_request:
     paths:
+      - 'index.html'
       - 'app/tinter-survey-v11.js'
       - 'app/tinter-runtime-v11.js'
+      - 'app/tinter-runtime-v11-scope-fix.js'
       - 'app/season-hybrid-v11.js'
       - 'app/profile-v11.js'
       - 'app/report-ui-v11.js'
@@ -31,6 +35,7 @@ jobs:
         run: |
           node --check app/tinter-survey-v11.js
           node --check app/tinter-runtime-v11.js
+          node --check app/tinter-runtime-v11-scope-fix.js
           node --check app/season-hybrid-v11.js
           node --check app/profile-v11.js
           node --check app/report-ui-v11.js
