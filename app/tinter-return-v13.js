@@ -55,7 +55,6 @@
       startY:event.clientY,
       dx:0,dy:0
     });
-    stage.classList.add('card-drag-active');
   },true);
 
   document.addEventListener('pointermove',event=>{
@@ -63,6 +62,9 @@
     if(!state)return;
     state.dx=event.clientX-state.startX;
     state.dy=event.clientY-state.startY;
+    const moved=Math.hypot(state.dx,state.dy);
+    if(moved<8)return;
+    state.stage.classList.add('card-drag-active');
     const ready=state.dy<=-threshold(state.stage);
     state.stage.classList.toggle('card-commit-ready',ready);
     state.card.classList.toggle('is-commit-ready',ready);
