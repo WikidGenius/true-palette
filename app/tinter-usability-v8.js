@@ -23,7 +23,7 @@
     const step=prompt.querySelector('.tinter-step-count')?.textContent?.trim()||'';
     const raw=prompt.textContent.replace(step,'').trim();
     const label=(raw.split(':')[0]||'Color comparison').trim();
-    prompt.innerHTML=`<span class="tinter-question-label">${label}</span><span class="tinter-question-main">Which color makes your skin look more even and your features look naturally defined?</span>${step?`<span class="tinter-step-count">${step}</span>`:''}<span class="tinter-judge-inline">Look for softer shadows, less redness or grayness, and eyes or lips that stand out without effort.</span>`;
+    prompt.innerHTML=`<span class="tinter-question-label">${label}</span><span class="tinter-question-main">Which color makes your skin look more even and your eyes, brows, and lips easier to see?</span>${step?`<span class="tinter-step-count">${step}</span>`:''}<span class="tinter-judge-inline">Look for less redness or grayness, softer shadows, and features that remain clearer than the swatch.</span>`;
   }
 
   function ensureRefinementControls(){
