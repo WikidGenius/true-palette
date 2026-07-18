@@ -1,0 +1,77 @@
+/* Quiet UI cleanup for the immersive Tinter survey. */
+.tinter-head>div:first-child{
+  padding:7px 10px!important;
+  border-color:rgba(255,255,255,.10)!important;
+  background:rgba(12,12,13,.24)!important;
+  box-shadow:none!important;
+}
+.tinter-settings-toggle,.tinter-close{
+  border-color:rgba(255,255,255,.12)!important;
+  background:rgba(12,12,13,.26)!important;
+  box-shadow:none!important;
+}
+.tinter-light-badge{
+  min-height:34px!important;
+  padding:5px 10px!important;
+  border-color:rgba(255,255,255,.12)!important;
+  box-shadow:none!important;
+  background:rgba(12,12,13,.30)!important;
+}
+.tinter-question{
+  width:min(580px,calc(100% - 32px))!important;
+  padding:13px 16px 14px!important;
+  border-radius:18px!important;
+  border-color:rgba(255,255,255,.26)!important;
+  background:rgba(250,246,239,.93)!important;
+  box-shadow:0 12px 34px rgba(0,0,0,.18)!important;
+  backdrop-filter:blur(18px) saturate(115%)!important;
+  -webkit-backdrop-filter:blur(18px) saturate(115%)!important;
+}
+.tinter-question-label{font-size:8.5px!important;letter-spacing:.13em!important;opacity:.78}
+.tinter-step-count{font-weight:700!important;color:#8a7d72!important}
+.tinter-question-main{font-size:clamp(18px,3.4vw,22px)!important;line-height:1.12!important;letter-spacing:-.025em!important}
+.tinter-judge-inline{margin-top:4px!important;font-size:11px!important;line-height:1.4!important;color:#6f645c!important}
+.tinter-status{
+  top:calc(env(safe-area-inset-top) + 196px)!important;
+  max-width:min(520px,calc(100% - 42px))!important;
+  padding:7px 11px!important;
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:rgba(10,10,11,.28)!important;
+  box-shadow:none!important;
+}
+.smooth-card{
+  min-height:124px!important;
+  padding:9px!important;
+  border-radius:14px!important;
+  box-shadow:0 14px 36px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.78)!important;
+}
+.smooth-chip{height:78px!important;border-radius:8px!important}
+.blind-card .smooth-name{font-size:10px!important;letter-spacing:.10em!important}
+.blind-card .smooth-hex{display:none!important}
+.tinter-no-diff{
+  min-height:38px!important;
+  padding:7px 13px!important;
+  background:rgba(10,10,11,.28)!important;
+  border-color:rgba(255,255,255,.14)!important;
+  font-size:11.5px!important;
+}
+@media(max-width:900px){
+  .tinter-settings-label{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
+  .tinter-settings-toggle{width:44px!important;min-width:44px!important;padding:0!important;justify-content:center!important}
+}
+@media(max-width:640px){
+  .tinter-head>div:first-child{padding:6px 8px!important;background:transparent!important;border-color:transparent!important}
+  .tinter-question{top:calc(env(safe-area-inset-top) + 64px)!important;width:calc(100% - 18px)!important;padding:11px 13px 12px!important;border-radius:17px!important}
+  .tinter-question-main{font-size:17.5px!important}
+  .tinter-judge-inline{font-size:10.2px!important}
+  .tinter-status{top:calc(env(safe-area-inset-top) + 184px)!important;font-size:10px!important}
+  .smooth-card{min-height:116px!important;padding:8px!important;border-radius:12px!important}
+  .smooth-chip{height:70px!important;border-radius:7px!important}
+  .tinter-choice-footer{bottom:calc(env(safe-area-inset-bottom) + 148px)!important}
+}
+@media(max-height:720px){
+  .tinter-question{top:calc(env(safe-area-inset-top) + 58px)!important}
+  .smooth-card{min-height:108px!important}
+  .smooth-chip{height:62px!important}
+  .tinter-choice-footer{bottom:calc(env(safe-area-inset-bottom) + 136px)!important}
+}
