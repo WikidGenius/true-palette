@@ -10,10 +10,11 @@
     if(!panel||!button)return;
     panel.hidden=!open;
     button.setAttribute('aria-expanded',String(open));
+    button.setAttribute('aria-label',open?'Close camera settings':'Open camera settings');
     button.classList.toggle('is-active',open);
     card?.classList.toggle('settings-open',open);
     const label=button.querySelector('.tinter-settings-label');
-    if(label)label.textContent=open?'Done':'Settings';
+    if(label)label.textContent=open?'Done':'Camera';
   }
 
   function rewritePrompt(){
@@ -60,7 +61,8 @@
       settings.setAttribute('aria-expanded','false');
       settings.setAttribute('aria-controls','tinterBalance');
       settings.setAttribute('aria-label','Open camera settings');
-      settings.innerHTML='<span class="tinter-settings-icon" aria-hidden="true">⚙︎</span><span class="tinter-settings-label">Settings</span>';
+      settings.setAttribute('title','Camera settings');
+      settings.innerHTML='<span class="tinter-settings-icon" aria-hidden="true"><i></i><i></i><i></i></span><span class="tinter-settings-label">Camera</span>';
       close.before(actions);
       actions.append(settings,close);
       settings.addEventListener('click',()=>setSettingsOpen(panel.hidden));
