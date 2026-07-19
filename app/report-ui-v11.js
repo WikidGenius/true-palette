@@ -5,6 +5,26 @@
   const qa=s=>Array.from(document.querySelectorAll(s));
   const escapeHtml=value=>String(value??'').replace(/[&<>'"]/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[char]));
   const roles=['Light neutral','Main neutral','Dark neutral','Second dark neutral','Main color','Complement color','Accent color','Metal'];
+  const countLabel=(count,singular,plural=`${singular}s`)=>`${count} ${count===1?singular:plural}`;
+  const roundedPercent=value=>Number.isFinite(Number(value))?Math.round(Number(value)):null;
+
+  function stabilityPercent(stability){
+    if(!stability)return null;
+    if(Number.isFinite(Number(stability.percent)))return roundedPercent(stability.percent);
+    if(Number.isFinite(Number(stability.score)))return roundedPercent(Number(stability.score)*100);
+    return null;
+  }
+
+  function confidenceBadgeText(confidence){
+    const label=String(confidence?.label||'Result').trim();
+    return /confidence|result/i.test(label)?label:`${label} confidence`;
+  }
+
+  function humanizeEvidenceLine(item){
+    let text=String(item??'').trim();
+    text=text.replace(/\((\d+)\s+checks?\)\.?$/i,(_,count)=>`across ${countLabel(Number(count),'check')}.`);
+    return text?text.charAt(0).toUpperCase()+text.slice(1):text;
+  }
 
   window.state={last:null,activeSlide:0,dockAutoHide:false,lastScrollY:0,adjusted:false};
 
@@ -23,7 +43,7 @@
 
   function evidenceItems(report){
     const prepared=report.tinter?.evidence;
-    if(Array.isArray(prepared)&&prepared.length)return prepared.slice(0,5);
+    if(Array.isArray(prepared)&&prepared.length)return prepared.slice(0,5).map(humanizeEvidenceLine);
     const answers=(report.tinter?.answers||[]).filter(answer=>answer.axis&&!answer.control&&!answer.validation);
     if(!answers.length)return ['Built from the camera-free observations.','The result combines warmth, depth, color strength, and contrast.'];
     const axes=[];
@@ -32,7 +52,8 @@
       const axisAnswers=answers.filter(answer=>answer.axis===axis);
       const decisive=[...axisAnswers].reverse().find(answer=>answer.vote!==0);
       const answer=decisive||axisAnswers[axisAnswers.length-1];
-      return !answer||answer.vote===0?`No clear difference in the ${axis} comparisons.`:`Preferred ${answer.pick} over ${answer.rejected}.`;
+      const line=!answer||answer.vote===0?`No clear difference in the ${axis} comparisons.`:`Preferred ${answer.pick} over ${answer.rejected}.`;
+      return humanizeEvidenceLine(line);
     });
   }
 
@@ -46,18 +67,19 @@
     const tinter=report.tinter;
     if(!tinter)return '';
     const badges=[];
-    if(tinter.comparisons)badges.push(`${tinter.comparisons} survey rounds`);
-    if(tinter.adaptiveQuestions)badges.push(`${tinter.adaptiveQuestions} adaptive checks`);
+    if(tinter.comparisons)badges.push(countLabel(tinter.comparisons,'comparison'));
+    if(tinter.adaptiveQuestions)badges.push(countLabel(tinter.adaptiveQuestions,'follow-up check'));
     const validation=tinter.validation;
     if(validation?.count){
-      const outcome=validation.decisive?`${validation.correct}/${validation.decisive} predicted`:`${validation.ties} validation ties`;
+      const outcome=validation.decisive?`${validation.correct}/${validation.decisive} prediction checks matched`:countLabel(validation.ties,'validation tie');
       badges.push(outcome);
     }
     const calibration=tinter.surveyQuality?.calibrationScore;
     if(Number.isFinite(calibration))badges.push(calibration===1?'Calibration passed':calibration>0?'Calibration mixed':'Calibration missed');
     const lighting=tinter.lighting?.key;
-    if(lighting&&lighting!=='skipped')badges.push(lighting==='good'?'Lighting good':lighting==='okay'?'Lighting fair':'Lighting poor');
-    if(tinter.stability)badges.push(`${tinter.stability.score}% retest stability`);
+    if(lighting&&lighting!=='skipped')badges.push(lighting==='good'?'Good lighting':lighting==='okay'?'Fair lighting':'Poor lighting');
+    const match=stabilityPercent(tinter.stability);
+    if(match!==null)badges.push(`${match}% retest match`);
     return badges.map(label=>`<span class="confidence-badge">${escapeHtml(label)}</span>`).join('');
   }
 
@@ -67,16 +89,21 @@
     const items=[];
     const validation=tinter.validation;
     if(validation?.count){
-      if(validation.decisive)items.push(`Unseen validation predicted ${validation.correct} of ${validation.decisive} decisive choices.`);
-      if(validation.ties)items.push(`${validation.ties} validation comparison${validation.ties===1?' was':'s were'} too close to call.`);
+      if(validation.decisive)items.push(`The final prediction checks matched ${validation.correct} of ${validation.decisive} decisive choices.`);
+      if(validation.ties)items.push(`${countLabel(validation.ties,'validation comparison')} ${validation.ties===1?'was':'were'} too close to call.`);
     }
-    if(tinter.stability)items.push(`Compared with your previous session: ${tinter.stability.label.toLowerCase()} (${tinter.stability.score}%).`);
+    if(tinter.stability){
+      const match=stabilityPercent(tinter.stability);
+      const label=String(tinter.stability.label||'').toLowerCase();
+      const sentence=label.includes('very stable')?'This result closely matched your previous session':label.includes('mostly stable')?'This result mostly matched your previous session':'This result changed noticeably from your previous session';
+      items.push(`${sentence}${match===null?'.':` (${match}% match).`}`);
+    }
     const lighting=tinter.lighting;
-    if(lighting?.key==='low')items.push('Lighting quality reduced the weight of camera-based choices.');
+    if(lighting?.key==='low')items.push('Poor lighting made the camera-based choices less reliable, so they were weighted more cautiously.');
     else if(lighting?.key==='okay')items.push('Lighting was usable, though neutral daylight may improve repeatability.');
-    else if(lighting?.key==='good')items.push('Automatic exposure and color-cast check passed.');
+    else if(lighting?.key==='good')items.push('The automatic exposure and color-cast check passed.');
     if(!items.length)return '';
-    return `<section class="report-insight report-insight-wide"><h3>Survey checks</h3><ul>${items.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></section>`;
+    return `<section class="report-insight report-insight-wide"><h3>Survey quality</h3><ul>${items.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></section>`;
   }
 
   window.renderReport=function(report){
@@ -93,10 +120,10 @@
         <p class="report-client">${named?escapeHtml(report.client):escapeHtml(window.profileWords(report))}</p>
         <h2 class="report-palette">${escapeHtml(window.seasonName(report))}</h2>
         <p class="report-desc">${escapeHtml(window.styleReportText(report))}</p>
-        <div class="report-confidence"><span class="confidence-badge">${escapeHtml(confidence.label)}</span>${surveyBadges(report)}${report.refined?'<span class="confidence-badge">Refined with observations</span>':''}</div>
+        <div class="report-confidence"><span class="confidence-badge">${escapeHtml(confidenceBadgeText(confidence))}</span>${surveyBadges(report)}${report.refined?'<span class="confidence-badge">Refined with observations</span>':''}</div>
       </div>
       <div class="report-insight-grid">
-        <section class="report-insight"><h3>Why this result</h3>${evidenceHtml(report)}<p class="muted">${escapeHtml(confidence.description)}</p></section>
+        <section class="report-insight"><h3>Why these colors</h3>${evidenceHtml(report)}${confidence.description?`<p class="muted">${escapeHtml(confidence.description)}</p>`:''}</section>
         <section class="report-insight"><h3>Easy outfit combinations</h3>${outfitsHtml(report)}</section>
         ${surveyChecks(report)}
         <section class="report-insight report-insight-wide"><h3>Use more carefully near the face</h3><ul>${window.cautionColors(report).map(color=>`<li>${escapeHtml(color)}</li>`).join('')}</ul></section>
