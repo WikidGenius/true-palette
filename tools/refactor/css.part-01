@@ -1,0 +1,92 @@
+  position:relative;
+  width:220px;
+  min-height:96px;
+  display:grid;
+  place-items:center;
+  padding:0 24px;
+  border:1px solid rgba(114,91,73,.18);
+  border-radius:999px;
+  background:#fffdf9;
+  color:var(--cocoa,#493a31);
+  box-shadow:0 14px 34px rgba(58,38,29,.10);
+  cursor:pointer;
+  transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+}
+.tinter-entry:hover{transform:translateY(-2px);box-shadow:0 18px 42px rgba(58,38,29,.13);border-color:rgba(181,109,75,.34)}
+.tinter-entry:active{transform:scale(.99)}
+.tinter-entry:focus-visible{outline:3px solid rgba(47,93,98,.30);outline-offset:4px}
+.tinter-entry.tinter-complete::after{
+  content:"✓";
+  position:absolute;
+  right:18px;
+  top:16px;
+  width:22px;
+  height:22px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--teal,#2f5d62);
+  color:white;
+  font:800 12px/1 var(--sans,Arial,sans-serif);
+}
+.tinter-secondary{
+  min-height:34px;
+  padding:4px 8px;
+  border:0;
+  background:transparent;
+  color:#76685e;
+  box-shadow:none;
+  font-size:11px;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  cursor:pointer;
+}
+.tinter-trust{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:7px 15px;
+  margin-top:14px;
+  color:var(--muted,#766f67);
+  font-size:11px;
+  font-weight:700;
+}
+.tinter-trust span::before{content:"✓";margin-right:5px;color:var(--teal,#2f5d62);font-weight:900}
+.report-area{width:100%;margin-top:28px;scroll-margin-top:18px;border-radius:30px;box-shadow:0 18px 54px rgba(58,38,29,.08)}
+
+.tinter-logo-lockup{
+  display:inline-grid;
+  grid-template-columns:auto auto;
+  align-items:center;
+  justify-content:center;
+  column-gap:2px;
+  line-height:1;
+}
+.tinter-style-glyph{
+  width:30px;
+  height:30px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  font-family:'Material Symbols Outlined';
+  font-size:30px;
+  font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;
+  color:var(--terra,#b56d4b);
+}
+.tinter-word{
+  font-family:var(--cute,"Quicksand","Nunito Sans",sans-serif);
+  font-size:40px;
+  font-weight:700;
+  letter-spacing:-.075em;
+  line-height:.9;
+  color:var(--cocoa,#493a31);
+}
+.tinter-home-brand .tinter-word{font-size:30px}
+.tinter-home-brand .tinter-style-glyph{width:24px;height:24px;font-size:24px}
+.tinter-entry .tinter-word{font-size:48px}
+.tinter-entry .tinter-style-glyph{width:34px;height:34px;font-size:34px}
+
+body.tinter-active{overflow:hidden;touch-action:none}
+.tinter-modal{
+  position:fixed;
+  inset:0;
