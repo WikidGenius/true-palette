@@ -1,0 +1,72 @@
+name: Apply production refactor
+
+on:
+  push:
+    paths:
+      - tools/production-refactor-v1.tar.gz.b64
+
+permissions:
+  contents: write
+
+concurrency:
+  group: production-refactor
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify and unpack refactor
+        shell: bash
+        run: |
+          base64 -d tools/production-refactor-v1.tar.gz.b64 > /tmp/production-refactor-v1.tar.gz
+          echo "b059586e98705936978801ceb49a3d5d672c85a7e3c25b7914c91897cc6c834b  /tmp/production-refactor-v1.tar.gz" | sha256sum -c -
+          tar -xzf /tmp/production-refactor-v1.tar.gz -C .
+
+      - name: Remove obsolete Tinter adjustment layers
+        shell: bash
+        run: |
+          rm -f \
+            app/tinter-optimized.css \
+            app/tinter-first.css \
+            app/tinter-usability-v8.css \
+            app/tinter-immersive-v9.css \
+            app/tinter-gesture-v9.css \
+            app/tinter-intelligence-v11.css \
+            app/tinter-cleanup-v12.css \
+            app/tinter-help-v15.css \
+            app/tinter-minimal-v16.css \
+            app/tinter-survey-v11.js \
+            app/tinter-language-v11.js \
+            app/tinter-runtime-v11-scope-fix.js \
+            app/tinter-runtime-v11.js \
+            app/tinter-usability-v8.js \
+            app/tinter-immersive-v9.js \
+            app/tinter-return-v13.js \
+            app/tinter-help-v15.js \
+            app/tinter-minimal-v16.js \
+            tests/tinter-survey-v11.test.mjs
+          rm -f tools/production-refactor-v1.tar.gz.b64 .github/workflows/apply-production-refactor.yml
+
+      - name: Validate refactored app
+        run: |
+          node scripts/check-active-js.mjs
+          node tests/tinter-survey.test.mjs
+
+      - name: Commit refactor
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Refactor Tinter into production architecture"
+          git push
