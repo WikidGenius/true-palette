@@ -1,0 +1,85 @@
+  const selected=choice?item[choice]:null;
+  const rejected=choice?(choice==='left'?item.right:item.left):null;
+  const vote=selected?colorVote(item,selected):0;
+  if(item.control||item.validation||!item.axis||!selected){
+    return {delta,evidence,selected,rejected,vote};
+  }
+  const lightFactor=lighting==='low' ? .72 : lighting==='okay' ? .88 : lighting==='skipped' ? .82 : 1;
+  for(const axis of AXES){
+    const selectedScore=Number(selected.score?.[axis])||0;
+    const rejectedScore=Number(rejected?.score?.[axis])||0;
+    const amount=((selectedScore-rejectedScore)/2)*(item.weight||1)*lightFactor;
+    delta[axis]=amount;
+    evidence[axis]=Math.abs(amount);
+  }
+  return {delta,evidence,selected,rejected,vote};
+}
+
+function normalizedAxis(score,evidence){
+  if(!evidence)return 0;
+  return clamp((score/evidence)*100,-100,100);
+}
+
+function normalizeScores(scores,evidence){
+  return Object.fromEntries(AXES.map(axis=>[axis,Math.round(normalizedAxis(scores[axis]||0,evidence[axis]||0))]));
+}
+
+function axisStats(responses,scores,evidence){
+  const result={};
+  for(const axis of AXES){
+    const relevant=responses.filter(response=>response.axis===axis&&!response.control&&!response.validation);
+    const decisive=relevant.filter(response=>response.vote!==0);
+    const positive=decisive.filter(response=>response.vote>0).length;
+    const negative=decisive.filter(response=>response.vote<0).length;
+    const direction=Math.sign((scores[axis]||0));
+    const agreeing=direction===0?0:decisive.filter(response=>response.vote===direction).length;
+    const consistency=decisive.length?agreeing/decisive.length:.5;
+    const volume=clamp((evidence[axis]||0)/48,0,1);
+    result[axis]={
+      axis,label:AXIS_LABELS[axis],questions:relevant.length,decisive:decisive.length,
+      positive,negative,ties:relevant.length-decisive.length,direction,
+      normalized:Math.round(normalizedAxis(scores[axis]||0,evidence[axis]||0)),
+      consistency,confidence:clamp((consistency*.72)+(volume*.28),0,1),evidence:evidence[axis]||0
+    };
+  }
+  return result;
+}
+
+function planAdaptive({responses,scores,evidence,queue},random=Math.random){
+  const stats=axisStats(responses,scores,evidence);
+  const used=new Set(queue.map(item=>item.id));
+  const ranked=AXES.map(axis=>stats[axis]).sort((a,b)=>b.confidence-a.confidence);
+  const strongest=ranked[0];
+  const weakest=[...ranked].sort((a,b)=>a.confidence-b.confidence).slice(0,2);
+  const additions=[];
+  if(strongest&&strongest.direction){
+    const branch=BRANCHES[strongest.axis][strongest.direction>0?'positive':'negative'][0];
+    const item=orient({...branch,predictedSign:strongest.direction,reason:'confirm strongest pattern'},random);
+    if(!used.has(item.id)){additions.push(item);used.add(item.id)}
+  }
+  for(const stat of weakest){
+    const candidate=TIEBREAKERS[stat.axis].find(item=>!used.has(item.id));
+    if(candidate){additions.push(orient({...candidate,predictedSign:stat.direction,reason:'resolve uncertain dimension'},random));used.add(candidate.id)}
+  }
+  return additions.slice(0,3);
+}
+
+function planResolution({responses,scores,evidence,queue},random=Math.random){
+  const used=new Set(queue.map(item=>item.id));
+  const contradictions=responses.filter(response=>['challenge','final'].includes(response.stage)&&response.predictedSign&&response.vote&&response.vote!==response.predictedSign);
+  const axes=[...new Set(contradictions.map(response=>response.axis))];
+  const additions=[];
+  const stats=axisStats(responses,scores,evidence);
+  for(const axis of axes.slice(0,2)){
+    const direction=stats[axis].direction||-contradictions.find(response=>response.axis===axis).predictedSign;
+    const branch=BRANCHES[axis][direction>=0?'positive':'negative'][1];
+    if(branch&&!used.has(branch.id))additions.push(orient({...branch,predictedSign:direction,reason:'recheck mixed signal'},random));
+  }
+  return additions;
+}
+
+function planValidation({scores,evidence,queue,count=2},random=Math.random){
+  const used=new Set(queue.map(item=>item.id));
+  const ranked=AXES.map(axis=>({axis,strength:Math.abs(normalizedAxis(scores[axis]||0,evidence[axis]||0)),sign:Math.sign(scores[axis]||0)})).sort((a,b)=>b.strength-a.strength);
+  const additions=[];
+  for(const item of ranked){
