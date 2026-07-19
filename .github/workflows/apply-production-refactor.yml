@@ -3,7 +3,7 @@ name: Apply production refactor
 on:
   push:
     paths:
-      - tools/production-refactor-v1.tar.gz.b64
+      - tools/production-refactor-v1.part-05
 
 permissions:
   contents: write
@@ -24,7 +24,8 @@ jobs:
       - name: Verify and unpack refactor
         shell: bash
         run: |
-          base64 -d tools/production-refactor-v1.tar.gz.b64 > /tmp/production-refactor-v1.tar.gz
+          cat tools/production-refactor-v1.part-* > /tmp/production-refactor-v1.tar.gz.b64
+          base64 -d /tmp/production-refactor-v1.tar.gz.b64 > /tmp/production-refactor-v1.tar.gz
           echo "b059586e98705936978801ceb49a3d5d672c85a7e3c25b7914c91897cc6c834b  /tmp/production-refactor-v1.tar.gz" | sha256sum -c -
           tar -xzf /tmp/production-refactor-v1.tar.gz -C .
 
@@ -51,7 +52,7 @@ jobs:
             app/tinter-help-v15.js \
             app/tinter-minimal-v16.js \
             tests/tinter-survey-v11.test.mjs
-          rm -f tools/production-refactor-v1.tar.gz.b64 .github/workflows/apply-production-refactor.yml
+          rm -f tools/production-refactor-v1.part-* .github/workflows/apply-production-refactor.yml
 
       - name: Validate refactored app
         run: |
