@@ -6,34 +6,48 @@
     secondary:null,hasSecondary:false,combinedLabel:'Balanced Neutral',paletteKey:'softSummerAutumn',kind:'neutral'
   };
 
+  const joinList=items=>{
+    const values=items.filter(Boolean);
+    if(values.length<2)return values[0]||'';
+    if(values.length===2)return `${values[0]} and ${values[1]}`;
+    return `${values.slice(0,-1).join(', ')}, and ${values.at(-1)}`;
+  };
+
+  function profileTraits(report){
+    const values=report.rec;
+    return {
+      temperature:values.temp>=30?'Warm temperature':values.temp<=-30?'Cool temperature':'Neutral temperature',
+      depth:values.value<=-30?'Deep depth':values.value>=30?'Light depth':'Medium depth',
+      finish:values.chroma<=-22||values.def<=-24?'Soft color':values.chroma>=28||values.def>=30?'Clear color':'Balanced color'
+    };
+  }
+
   window.seasonResult=analysis;
   window.seasonName=report=>analysis(report).combinedLabel;
   window.primarySeasonName=report=>analysis(report).primary.label;
   window.secondarySeasonName=report=>analysis(report).secondary?.label||'';
   window.seasonRelationshipText=function(report){
     const result=analysis(report);
-    if(result.kind==='neutral')return 'Temperature stayed balanced, so depth, softness, and contrast shape the palette more than a single season.';
-    if(!result.hasSecondary)return '';
-    return `Primary direction: ${result.primary.label} · Neighboring influence: ${result.secondary.label}`;
+    if(result.kind==='neutral')return 'Warm and cool comparisons were close, so depth, color clarity, and contrast matter more than a single seasonal family.';
+    if(!result.hasSecondary)return `Your closest seasonal match is ${result.primary.label}.`;
+    return `Your closest seasonal match is ${result.primary.label}, with some ${result.secondary.label} influence.`;
   };
 
+  window.profileTraits=profileTraits;
   window.profileWords=function(report){
-    const values=report.rec;
-    const temperature=values.temp>20?'Warm':values.temp<-20?'Cool':'Neutral';
-    const depth=values.value<-25?'Deep':values.value>25?'Light':'Medium';
-    const finish=values.chroma<-20||values.def<-20?'Soft':values.chroma>25||values.def>25?'Clear':'Balanced';
-    return `${temperature}, ${depth}, and ${finish}`;
+    const traits=profileTraits(report);
+    return `${traits.temperature} · ${traits.depth} · ${traits.finish}`;
   };
 
   window.styleReportText=function(report){
     const palette=window.paletteFromValues(report.rec);
     const values=report.rec;
-    const seasons=analysis(report);
-    const examples=[palette[0],palette[1],palette[4],palette[5],palette[6]].map(color=>color[0]).join(', ');
-    const depth=values.value<-25?'Deeper anchors and grounded mid-tones support your features.':values.value>25?'Lighter neutrals and lifted color keep the face fresh.':'Mid-value colors give you the easiest range.';
-    const clarity=values.chroma<-20||values.def<-20?'Softened, fabric-like color is more reliable than neon or glossy brights.':values.chroma>25||values.def>25?'Cleaner color and firmer contrast stay wearable when the finish remains refined.':'Moderate color strength and contrast are the most flexible.';
-    const relationship=window.seasonRelationshipText(report);
-    return `${seasons.combinedLabel} best describes your result. Your practical direction is ${window.profileWords(report)}, with wardrobe colors such as ${examples}. ${relationship} ${depth} ${clarity}`.replace(/\s+/g,' ').trim();
+    const examples=[palette[0],palette[1],palette[4],palette[5],palette[6]].map(color=>color[0]);
+    const traits=profileTraits(report);
+    const direction=`${traits.temperature.toLowerCase()}, ${traits.depth.toLowerCase()}, and ${traits.finish.toLowerCase()}`;
+    const depth=values.value<=-30?'Deeper anchors and grounded mid-tones give your features steady support.':values.value>=30?'Lighter neutrals and lifted mid-tones keep your face fresh without washing out your features.':'Medium-depth colors give you the broadest and easiest range.';
+    const clarity=values.chroma<=-22||values.def<=-24?'Softened, fabric-like color reduces distraction and keeps facial shadows gentle.':values.chroma>=28||values.def>=30?'Clean color and defined contrast keep your eyes, brows, and lips easy to see.':'Moderate color strength and contrast are the most flexible.';
+    return `${window.seasonRelationshipText(report)} Focus on ${direction}. Strong starting colors include ${joinList(examples)}. ${depth} ${clarity}`.replace(/\s+/g,' ').trim();
   };
 
   window.outfitCombinations=function(report){
@@ -44,14 +58,14 @@
   window.cautionColors=function(report){
     const values=report.rec;
     const colors=[];
-    if(values.temp>20)colors.push('Optic white','Icy lavender');
-    else if(values.temp<-20)colors.push('Golden camel','Orange coral');
-    else colors.push('Extreme orange','Very icy blue');
-    if(values.chroma<-20)colors.push('Electric brights');
-    else if(values.chroma>25)colors.push('Muddy gray-beige');
+    if(values.temp>=30)colors.push('Optic white','Icy lavender');
+    else if(values.temp<=-30)colors.push('Golden camel','Orange coral');
+    else colors.push('Strong orange','Very icy blue');
+    if(values.chroma<=-22)colors.push('Electric brights');
+    else if(values.chroma>=28)colors.push('Muddy gray-beige');
     else colors.push('Highlighter yellow');
-    if(values.value<-25)colors.push('Very pale pastels');
-    else if(values.value>25)colors.push('Near-black anchors');
+    if(values.value<=-30)colors.push('Very pale pastels');
+    else if(values.value>=30)colors.push('Near-black colors');
     return [...new Set(colors)].slice(0,4);
   };
 
