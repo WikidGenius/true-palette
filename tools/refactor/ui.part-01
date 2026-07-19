@@ -1,0 +1,82 @@
+  }
+
+  function lockViewport(){
+    savedScroll=window.scrollY||0;
+    lastFocus=document.activeElement;
+    updateViewport();
+    document.body.classList.add('tinter-active');
+    Object.assign(document.body.style,{position:'fixed',top:`-${savedScroll}px`,left:'0',right:'0',width:'100%'});
+    window.visualViewport?.addEventListener('resize',updateViewport);
+  }
+
+  function unlockViewport(){
+    window.visualViewport?.removeEventListener('resize',updateViewport);
+    document.body.classList.remove('tinter-active');
+    for(const property of ['position','top','left','right','width'])document.body.style[property]='';
+    window.scrollTo(0,savedScroll||0);
+  }
+
+  function init(){
+    if(!q('#tinterModal'))document.body.insertAdjacentHTML('beforeend',modalHtml());
+    bind();
+    setLaunchComplete(false);
+  }
+
+  function bind(){
+    q('#tinterClose').onclick=()=>onClose({scrollToResults:false});
+    q('#tinterSettings').onclick=()=>setSettingsOpen(!settingsOpen);
+    q('#tinterTie').onclick=onTie;
+    q('#tinterLightBadge').onclick=onRecheckLighting;
+    q('#tinterAutoTemp').onclick=onAutoBalance;
+    q('#tinterWarmth').oninput=onBalanceChange;
+    q('#tinterTint').oninput=onBalanceChange;
+    q('#tinterQuestionHelpDone').onclick=closeHelp;
+    document.addEventListener('keydown',handleKeydown);
+    document.addEventListener('click',event=>{
+      if(!helpOpen)return;
+      if(event.target.closest?.('#tinterQuestionHelpPanel,#tinterQuestionHelpButton'))return;
+      closeHelp();
+    });
+    window.addEventListener('resize',positionHelp);
+  }
+
+  function setLaunchComplete(complete){
+    const button=q('#tinterOpen');
+    const prompt=q('#tinterStartPrompt');
+    if(button){
+      button.classList.toggle('tinter-complete',complete);
+      button.setAttribute('aria-label',complete?'Run Tinter again':'Start Tinter color analysis');
+      button.setAttribute('title',complete?'Run Tinter again':'Start Tinter');
+      button.innerHTML=logoHtml();
+    }
+    if(prompt)prompt.textContent=complete?'Tap to retake':'Press to start';
+  }
+
+  function openModal(){
+    q('#tinterModal').hidden=false;
+    lockViewport();
+    setSettingsOpen(false);
+    closeHelp();
+    q('#tinterClose')?.focus({preventScroll:true});
+  }
+
+  function closeModal({scrollToResults=false}={}){
+    const modal=q('#tinterModal');
+    if(modal)modal.hidden=true;
+    setSettingsOpen(false);
+    closeHelp();
+    unlockViewport();
+    if(lastFocus&&typeof lastFocus.focus==='function')lastFocus.focus({preventScroll:true});
+    if(scrollToResults){
+      window.setTimeout(()=>{
+        const target=q('.report-area');
+        if(!target)return;
+        const behavior=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches?'auto':'smooth';
+        target.scrollIntoView({behavior,block:'start'});
+      },180);
+    }
+  }
+
+  function setSettingsOpen(open){
+    settingsOpen=Boolean(open);
+    const panel=q('#tinterBalance');
