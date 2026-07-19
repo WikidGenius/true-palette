@@ -1,0 +1,82 @@
+    const button=q('#tinterSettings');
+    panel.hidden=!settingsOpen;
+    button.setAttribute('aria-expanded',String(settingsOpen));
+    button.setAttribute('aria-label',settingsOpen?'Close camera settings':'Open camera settings');
+    button.classList.toggle('is-active',settingsOpen);
+    q('#tinterCard').classList.toggle('settings-open',settingsOpen);
+    if(settingsOpen)closeHelp();
+  }
+
+  function positionHelp(){
+    const panel=q('#tinterQuestionHelpPanel');
+    const prompt=q('#tinterPrompt');
+    if(!panel||!prompt||panel.hidden)return;
+    panel.style.top=`${Math.round(prompt.offsetTop+prompt.offsetHeight+8)}px`;
+  }
+
+  function openHelp(){
+    const item=currentQuestion();
+    if(!item)return;
+    const help=helpFor(item);
+    q('#tinterQuestionHelpTitle').textContent=help.title;
+    q('#tinterQuestionHelpBody').textContent=help.body;
+    const note=q('#tinterQuestionHelpNote');
+    note.textContent=help.note||'';
+    note.hidden=!help.note;
+    q('#tinterQuestionHelpPanel').hidden=false;
+    q('#tinterQuestionHelpButton')?.setAttribute('aria-expanded','true');
+    q('#tinterCard').classList.add('question-help-open');
+    helpOpen=true;
+    positionHelp();
+  }
+
+  function closeHelp(){
+    const panel=q('#tinterQuestionHelpPanel');
+    if(panel)panel.hidden=true;
+    q('#tinterQuestionHelpButton')?.setAttribute('aria-expanded','false');
+    q('#tinterCard')?.classList.remove('question-help-open');
+    helpOpen=false;
+  }
+
+  function toggleHelp(){helpOpen?closeHelp():openHelp()}
+
+  function renderPrompt(item,index){
+    const prompt=q('#tinterPrompt');
+    prompt.replaceChildren();
+    const label=document.createElement('span');label.className='tinter-question-label';label.textContent=phaseLabel(item.stage);
+    const main=document.createElement('span');main.className='tinter-question-main';main.textContent=item.question;
+    const count=document.createElement('span');count.className='tinter-step-count';count.textContent=`Question ${index+1}`;
+    const hint=document.createElement('span');hint.className='tinter-judge-inline';hint.textContent=item.hint;
+    const help=document.createElement('button');
+    help.type='button';help.id='tinterQuestionHelpButton';help.className='tinter-question-help';help.textContent='i';
+    help.setAttribute('aria-expanded','false');help.setAttribute('aria-controls','tinterQuestionHelpPanel');
+    help.setAttribute('aria-label',`More help for ${item.label||'this question'}`);help.title='What should I look for?';
+    help.addEventListener('click',event=>{event.preventDefault();event.stopPropagation();toggleHelp()});
+    prompt.append(label,main,count,hint,help);
+  }
+
+  function cardElement(side,item){
+    const suffix=side==='left'?'A':'B';
+    const label=item.stage==='practice'?`Practice ${suffix}`:`Drape ${suffix}`;
+    const card=document.createElement('article');
+    card.className='smooth-card blind-card';card.dataset.side=side;card.role='button';card.tabIndex=0;
+    card.setAttribute('aria-label',`Choose ${label}`);
+    const chip=document.createElement('div');chip.className='smooth-chip';chip.style.background=item[side].hex;
+    const name=document.createElement('b');name.className='smooth-name';name.textContent=label;
+    card.append(chip,name);
+    wireCard(card);
+    return card;
+  }
+
+  function renderQuestion(item,index){
+    closeHelp();
+    q('#tinterCard').classList.remove('done');
+    q('#tinterStage').classList.remove('smooth-done','tie-chosen');
+    q('#tinterStage').dataset.phase=item.stage;
+    q('#tinterSummary').hidden=true;
+    renderPrompt(item,index);
+    const deck=q('#smoothDeck');
+    deck.replaceChildren(cardElement('left',item),cardElement('right',item));
+    clearPreview();
+    setInteractionEnabled(state.interactionReady);
+  }
