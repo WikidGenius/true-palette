@@ -29,11 +29,18 @@ for (const id of requiredIds) {
 const expectedOrder = [
   'app/intake-v6.js',
   'app/fabric-color-engine-v4.js',
-  'app/profile-v6.js',
-  'app/report-ui-v6.js',
+  'app/season-hybrid-v11.js',
+  'app/profile-v11.js',
+  'app/report-ui-v11.js',
   'app/report-export-v2.js',
   'app/main.js',
-  'app/tinter-runtime-v3.js',
+  'app/tinter-survey-v11.js',
+  'app/tinter-language-v11.js',
+  'app/tinter-runtime-v11-scope-fix.js',
+  'app/tinter-runtime-v11.js',
+  'app/tinter-usability-v8.js',
+  'app/tinter-immersive-v9.js',
+  'app/tinter-return-v13.js',
   'app/reset-random.js',
   'app/report-visibility.js'
 ];
@@ -46,25 +53,43 @@ for (const file of expectedOrder) {
   previousIndex = index;
 }
 
-const runtime = fs.readFileSync('app/tinter-runtime-v3.js', 'utf8');
+const survey = fs.readFileSync('app/tinter-survey-v11.js', 'utf8');
+const runtime = fs.readFileSync('app/tinter-runtime-v11.js', 'utf8');
+const season = fs.readFileSync('app/season-hybrid-v11.js', 'utf8');
 const intake = fs.readFileSync('app/intake-v6.js', 'utf8');
-const report = fs.readFileSync('app/report-ui-v6.js', 'utf8');
+const report = fs.readFileSync('app/report-ui-v11.js', 'utf8');
+
+const surveyContracts = [
+  'planAdaptive',
+  'planResolution',
+  'planValidation',
+  'validationSummary',
+  'compareSessions',
+  'normalizeScores'
+];
+for (const contract of surveyContracts) {
+  if (!survey.includes(contract)) fail(`Tinter survey contract missing: ${contract}`);
+}
 
 const runtimeContracts = [
-  'TINTER_FOUNDATION',
-  'TINTER_TIEBREAKERS',
-  'No clear difference',
-  'window.buildPalette',
   'Tinter.result',
-  'axisConfidence'
+  'lightingQuality',
+  'planValidation',
+  'compareSessions',
+  'window.buildPalette'
 ];
 for (const contract of runtimeContracts) {
   if (!runtime.includes(contract)) fail(`Tinter runtime contract missing: ${contract}`);
+}
+
+for (const label of ['Deep Neutral', 'Soft Neutral', 'Deep Autumn']) {
+  if (!season.includes(label)) fail(`Hybrid season contract missing: ${label}`);
 }
 
 if (!intake.includes('window.calculateObservationReport')) fail('Camera-free observation report is missing.');
 if (!intake.includes('window.calculateReport')) fail('Unified report calculation is missing.');
 if (!report.includes('Why this result')) fail('Report evidence panel is missing.');
 if (!report.includes('Easy outfit combinations')) fail('Outfit guidance is missing.');
+if (!report.includes('Survey checks')) fail('Survey validation panel is missing.');
 
 console.log(`\n✓ ${scripts.length} active scripts passed syntax and app-contract checks.`);
