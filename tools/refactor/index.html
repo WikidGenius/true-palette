@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tinter by True Palette</title>
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#f7f1e8">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Tinter">
+<link rel="apple-touch-icon" href="icons/icon.svg">
+<link rel="stylesheet" href="app/styles.css">
+<link rel="stylesheet" href="app/font-brand.css">
+<link rel="stylesheet" href="app/dock.css">
+<link rel="stylesheet" href="app/compare.css">
+<link rel="stylesheet" href="app/report-export-v2.css">
+<link rel="stylesheet" href="app/export-print-clean.css">
+<link rel="stylesheet" href="app/report-visibility.css">
+<link rel="stylesheet" href="app/mixed-quiz.css">
+<link rel="stylesheet" href="app/mixed-quiz-swatches.css">
+<link rel="stylesheet" href="app/quiz-visuals-v3.css">
+<link rel="stylesheet" href="app/touch-targets.css">
+<link rel="stylesheet" href="app/app-hierarchy.css">
+<link rel="stylesheet" href="app/tinter/tinter.css">
+</head>
+<body class="tinter-first report-waiting">
+<main class="shell">
+  <section class="tinter-home" aria-labelledby="homeTitle">
+    <div class="tinter-home-copy">
+      <div class="tinter-home-brand" aria-label="Tinter by True Palette">
+        <span class="tinter-logo-lockup"><span class="tinter-style-glyph" aria-hidden="true">style</span><span class="tinter-word">tinter</span></span>
+      </div>
+      <h1 id="homeTitle">Find colors that work with your face.</h1>
+      <p class="lead">Compare fabric colors on your live camera. Choose the color that makes your skin look more even and keeps your eyes, brows, and lips easy to see.</p>
+      <div class="tinter-look-for" aria-label="What to compare during Tinter">
+        <b>Watch your face, not the swatches</b>
+        <div class="tinter-look-for-list">
+          <span>More even-looking skin</span>
+          <span>Softer shadows</span>
+          <span>Eyes and lips stay visible</span>
+        </div>
+      </div>
+      <div class="tinter-home-actions">
+        <div class="tinter-launch">
+          <p id="tinterStartPrompt" class="tinter-start-prompt">Press to start</p>
+          <button type="button" id="tinterOpen" class="tinter-entry" aria-label="Start Tinter color analysis" title="Start Tinter">
+            <span class="tinter-logo-lockup"><span class="tinter-style-glyph" aria-hidden="true">style</span><span class="tinter-word">tinter</span></span>
+          </button>
+        </div>
+        <button type="button" id="noCamera" class="tinter-secondary">Use without camera</button>
+      </div>
+      <div class="tinter-trust" aria-label="Tinter details">
+        <span>No photo is saved</span><span>About two minutes</span><span>Usually 14–16 comparisons</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="card report report-area" aria-live="polite">
+    <p class="kicker">Your results</p>
+    <div id="result" class="empty">Complete Tinter to create your wardrobe palette.</div>
+    <div class="actions">
+      <button type="button" id="copy" class="secondary">Copy Style Report</button>
+      <button type="button" id="json" class="secondary">Export JSON</button>
+      <button type="button" onclick="window.print()" class="secondary">Print / PDF</button>
+    </div>
+  </section>
+
+  <section id="refineSection" class="refine-wrap" hidden>
+    <details id="refineDetails" class="refine-card" open>
+      <summary>
+        <span class="refine-summary-copy"><b>Optional refinement</b><span>Use this when the camera is unavailable or the first palette feels slightly off.</span></span>
+      </summary>
+      <div class="refine-body">
+        <form id="quiz" class="card">
+          <p class="kicker quiz-card-kicker">Refine Result</p>
+          <h2>Color observations</h2>
+          <p class="muted">These observations lightly adjust Tinter rather than replacing it.</p>
+          <div class="field client-field">
+            <label class="field-title">Name <span>optional</span></label>
+            <input id="client" name="client" placeholder="Example: Morgan" autocomplete="name">
+          </div>
+          <div id="questions"></div>
+          <div class="builder-actions">
+            <button type="button" id="analyze" class="primary-build">Apply refinements</button>
+            <button type="button" id="sample" class="secondary">Demo answers</button>
+            <button type="reset" class="secondary">Start over</button>
+          </div>
+        </form>
+      </div>
+    </details>
+  </section>
+</main>
+
+<section id="sliderDock" class="slider-dock" hidden>
+  <div class="dock-top">
+    <div>
+      <p class="kicker dock-kicker">Adjust Palette</p>
+      <b id="dockTitle">Temperature</b>
+    </div>
+    <label class="toggle"><input type="checkbox" id="outside"> Allow outside palette</label>
+  </div>
+  <div id="deck" class="deck" aria-label="Fashion slider cards"></div>
+  <div class="dock-foot">
+    <button type="button" id="prevCard" class="secondary" aria-label="Previous adjustment">‹</button>
+    <div id="dots" class="dots"></div>
+    <button type="button" id="nextCard" class="secondary" aria-label="Next adjustment">›</button>
+  </div>
+</section>
+
+<script src="app/intake-v6.js"></script>
+<script src="app/fabric-color-engine-v4.js"></script>
+<script src="app/season-hybrid-v11.js"></script>
+<script src="app/profile-v11.js"></script>
+<script src="app/report-ui-v11.js"></script>
+<script src="app/report-export-v2.js"></script>
+<script src="app/main.js"></script>
+<script type="module" src="app/tinter/app.js"></script>
+<script src="app/reset-random.js"></script>
+<script src="app/report-visibility.js"></script>
+</body>
+</html>
