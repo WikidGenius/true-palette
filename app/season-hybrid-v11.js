@@ -24,7 +24,7 @@
   function hybrid(primary,secondary,paletteKey){
     return {
       primary:PURE[primary],secondary:PURE[secondary],hasSecondary:true,
-      combinedLabel:`${PURE[primary].label} + ${PURE[secondary].family}`,
+      combinedLabel:`${PURE[primary].label} with ${PURE[secondary].label} influence`,
       paletteKey,kind:'hybrid'
     };
   }
