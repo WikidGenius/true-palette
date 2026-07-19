@@ -1,0 +1,79 @@
+      card.classList.add('is-dragging');try{card.setPointerCapture(pointerId)}catch{}
+    });
+    card.addEventListener('pointermove',event=>{
+      if(!dragging||state.busy)return;
+      event.preventDefault();dx=event.clientX-startX;dy=event.clientY-startY;if(!frame)frame=requestAnimationFrame(draw);
+    });
+    card.addEventListener('pointerup',event=>end(event,false));
+    card.addEventListener('pointercancel',event=>end(event,true));
+    card.addEventListener('keydown',event=>{
+      if((event.key==='Enter'||event.key===' ')&&!state.busy&&state.interactionReady){event.preventDefault();selectCard(card,side,0,-30)}
+    });
+  }
+
+  function selectCard(card,side,dx=0,dy=-30){
+    if(state.busy||!state.interactionReady||helpOpen)return;
+    if(onChoose(side)===false)return;
+    const rotation=dx===0?(side==='left'?-12:12):(dx>0?16:-16);
+    card.classList.add('is-throwing');
+    card.style.transform=`translate3d(${dx*1.08}px,${dy-250}px,0) rotate(${rotation}deg) scale(1.14)`;
+    q('#tinterStage').classList.add('smooth-done');
+    const drape=q('#smoothDrape');if(drape){drape.style.opacity='.82';drape.style.transform='translate3d(0,0,0) scaleY(1)'}
+    onChoose(side);
+  }
+
+
+  function animateTie(){
+    q('#tinterTie').disabled=true;
+    q('#tinterStage').classList.add('tie-chosen');
+    qa('.smooth-card').forEach(card=>card.classList.add('is-muted'));
+    const drape=q('#smoothDrape');
+    if(drape){drape.style.opacity='0';drape.style.transform='translate3d(0,0,0) scaleY(0)'}
+  }
+
+  function setProgress(percent){q('#tinterBar').style.width=`${clamp(percent,0,100)}%`}
+  function setStatus(text=''){q('#tinterStatus').textContent=text}
+  function clearCards(){q('#smoothDeck').replaceChildren()}
+  function setDone(done=true){q('#tinterCard').classList.toggle('done',done)}
+  function showSummary(heading){const summary=q('#tinterSummary');summary.innerHTML=`<b>${heading}</b><p>Building your palette…</p>`;summary.hidden=false}
+
+  function setLightBadge(quality){
+    const badge=q('#tinterLightBadge');
+    const key=quality?.key||'checking';
+    badge.dataset.quality=key;
+    badge.textContent=key==='okay'?'Lighting fair':key==='low'?'Improve lighting':key==='skipped'?'No camera':'';
+    badge.title=quality?.message||'Checking lighting';
+    badge.setAttribute('aria-label',quality?.message||'Checking lighting');
+  }
+
+  function getVideo(){return q('#tinterVideo')}
+  function getBalance(){return {warmth:Number(q('#tinterWarmth').value)||0,tint:Number(q('#tinterTint').value)||0}}
+  function setBalance({warmth=0,tint=0}){q('#tinterWarmth').value=warmth;q('#tinterTint').value=tint}
+  function setBalanceNote(text){q('#tinterBalanceNote').textContent=text}
+  function applyFilters({warmth=0,tint=0}){
+    const warmthAlpha=Math.min(.42,Math.abs(warmth)/190);const tintAlpha=Math.min(.28,Math.abs(tint)/220);
+    q('#tinterWarmFilter').style.background=warmth<0?`rgba(70,120,255,${warmthAlpha})`:warmth>0?`rgba(255,170,70,${warmthAlpha})`:'transparent';
+    q('#tinterTintFilter').style.background=tint<0?`rgba(60,180,110,${tintAlpha})`:tint>0?`rgba(220,80,190,${tintAlpha})`:'transparent';
+  }
+
+  function handleKeydown(event){
+    if(q('#tinterModal')?.hidden)return;
+    if(event.key==='Escape'){
+      if(helpOpen){closeHelp();return}
+      if(settingsOpen){setSettingsOpen(false);return}
+      onClose({scrollToResults:false});return;
+    }
+    if(event.key!=='Tab')return;
+    const focusable=qa('button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])',q('#tinterCard')).filter(element=>element.offsetParent!==null);
+    if(!focusable.length)return;
+    const first=focusable[0],last=focusable[focusable.length-1];
+    if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus()}
+    else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus()}
+  }
+
+  return {
+    init,openModal,closeModal,setLaunchComplete,renderQuestion,setInteractionEnabled,setProgress,setStatus,
+    setLightBadge,setSettingsOpen,closeHelp,clearPreview,clearCards,setDone,showSummary,animateTie,
+    getVideo,getBalance,setBalance,setBalanceNote,applyFilters,isHelpOpen:()=>helpOpen,isSettingsOpen:()=>settingsOpen
+  };
+}
