@@ -76,18 +76,6 @@ const modalHtml = () => `<section id="tinterModal" class="tinter-modal" hidden r
 
 function helpFor(item) {
   if (!item) return HELP.generic;
-  if (item.stage === 'practice') {
-    return {
-      title: 'This is only practice',
-      body: 'The two colors are identical. Try tapping or moving a card, then choose “They look about the same.” This question does not affect your result.'
-    };
-  }
-  if (item.stage === 'calibration') {
-    return {
-      title: 'This checks close comparisons',
-      body: 'These colors are intentionally almost the same. Choose “They look about the same” unless you see a real change in your face. This question does not affect your result.'
-    };
-  }
   return {
     ...(HELP[item.axis] || HELP.generic),
     note: item.validation ? 'This is a final prediction check. It does not change your palette score.' : ''
@@ -111,16 +99,30 @@ export function createTinterUI({
   let lastFocus = null;
 
   const updateViewport = () => {
-    document.documentElement.style.setProperty(
-      '--tinter-height',
-      `${Math.round(window.visualViewport?.height || window.innerHeight)}px`
-    );
+    const height = Math.max(window.innerHeight || 0, window.visualViewport?.height || 0);
+    document.documentElement.style.setProperty('--tinter-height', `${Math.round(height)}px`);
   };
+
+  function refreshViewport() {
+    updateViewport();
+    requestAnimationFrame(updateViewport);
+    window.setTimeout(updateViewport, 120);
+    window.setTimeout(updateViewport, 360);
+  }
+
+  function resetCameraFrame() {
+    const video = q('#tinterVideo');
+    if (!video) return;
+    video.style.objectFit = 'cover';
+    video.style.objectPosition = '50% 50%';
+    video.style.transform = 'scaleX(-1) translate3d(0,0,0)';
+    void video.offsetHeight;
+  }
 
   function lockViewport() {
     savedScroll = window.scrollY || 0;
     lastFocus = document.activeElement;
-    updateViewport();
+    refreshViewport();
     document.body.classList.add('tinter-active');
     Object.assign(document.body.style, {
       position: 'fixed',
@@ -135,9 +137,7 @@ export function createTinterUI({
   function unlockViewport() {
     window.visualViewport?.removeEventListener('resize', updateViewport);
     document.body.classList.remove('tinter-active');
-    for (const property of ['position', 'top', 'left', 'right', 'width']) {
-      document.body.style[property] = '';
-    }
+    for (const property of ['position', 'top', 'left', 'right', 'width']) document.body.style[property] = '';
     window.scrollTo(0, savedScroll || 0);
   }
 
@@ -160,7 +160,10 @@ export function createTinterUI({
     document.addEventListener('click', event => {
       if (helpOpen && !event.target.closest?.('#tinterQuestionHelpPanel,#tinterQuestionHelpButton')) closeHelp();
     });
-    window.addEventListener('resize', positionHelp);
+    window.addEventListener('resize', () => {
+      refreshViewport();
+      positionHelp();
+    });
   }
 
   function setLaunchComplete(complete) {
@@ -178,6 +181,7 @@ export function createTinterUI({
   function openModal() {
     q('#tinterModal').hidden = false;
     lockViewport();
+    resetCameraFrame();
     setSettingsOpen(false);
     closeHelp();
     q('#tinterClose')?.focus({ preventScroll: true });
@@ -214,9 +218,7 @@ export function createTinterUI({
   function positionHelp() {
     const panel = q('#tinterQuestionHelpPanel');
     const prompt = q('#tinterPrompt');
-    if (panel && !panel.hidden && prompt) {
-      panel.style.top = `${Math.round(prompt.offsetTop + prompt.offsetHeight + 8)}px`;
-    }
+    if (panel && !panel.hidden && prompt) panel.style.top = `${Math.round(prompt.offsetTop + prompt.offsetHeight + 8)}px`;
   }
 
   function openHelp() {
@@ -282,15 +284,13 @@ export function createTinterUI({
   }
 
   function cardElement(side, item) {
-    const suffix = side === 'left' ? 'A' : 'B';
-    const label = item.stage === 'practice' ? `Practice ${suffix}` : `Drape ${suffix}`;
     const card = document.createElement('article');
     card.className = 'smooth-card blind-card';
     card.dataset.side = side;
     card.role = 'button';
     card.tabIndex = 0;
     card.style.background = item[side].hex;
-    card.setAttribute('aria-label', `Choose ${label}`);
+    card.setAttribute('aria-label', `Choose drape ${side === 'left' ? 'A' : 'B'}`);
     wireCard(card);
     return card;
   }
@@ -316,6 +316,8 @@ export function createTinterUI({
     qa('.smooth-card').forEach(card => {
       card.classList.remove('is-muted', 'is-dragging', 'is-throwing', 'is-returning', 'is-commit-ready');
       card.style.transform = '';
+      card.style.transitionDuration = '';
+      card.style.transitionTimingFunction = '';
     });
     q('#tinterStage')?.classList.remove('tie-chosen', 'card-drag-active', 'card-commit-ready');
     const text = q('#tinterReturnZone span');
@@ -348,6 +350,8 @@ export function createTinterUI({
   function returnCard(card) {
     const drape = q('#smoothDrape');
     card.classList.add('is-returning');
+    card.style.transitionDuration = '';
+    card.style.transitionTimingFunction = '';
     if (drape) {
       drape.style.opacity = '0';
       drape.style.transform = 'translate3d(0,0,0) scaleY(0)';
@@ -380,10 +384,36 @@ export function createTinterUI({
     let startY = 0;
     let dx = 0;
     let dy = 0;
+    let velocityX = 0;
+    let velocityY = 0;
+    let sampleX = 0;
+    let sampleY = 0;
+    let sampleTime = 0;
     let dragging = false;
     let frame = 0;
     let pointerId = null;
     let other = null;
+
+    const sample = point => {
+      const time = Number.isFinite(point.timeStamp) ? point.timeStamp : performance.now();
+      if (sampleTime) {
+        const elapsed = clamp(time - sampleTime, 1, 80);
+        const instantX = (point.clientX - sampleX) / elapsed;
+        const instantY = (point.clientY - sampleY) / elapsed;
+        velocityX = velocityX * .35 + instantX * .65;
+        velocityY = velocityY * .35 + instantY * .65;
+      }
+      sampleX = point.clientX;
+      sampleY = point.clientY;
+      sampleTime = time;
+      dx = point.clientX - startX;
+      dy = point.clientY - startY;
+    };
+
+    const projectedDy = () => dy + velocityY * 220;
+    const hasUpwardIntent = () => dy < -18 && -dy > Math.abs(dx) * .35;
+    const isFlickReady = () => velocityY < -.65 && hasUpwardIntent() && projectedDy() <= -threshold();
+    const isCommitReady = () => dy <= -threshold() || isFlickReady();
 
     const draw = () => {
       frame = 0;
@@ -393,7 +423,7 @@ export function createTinterUI({
       setPreview(side, progress);
       other?.classList.toggle('is-muted', progress > .08);
       const moved = Math.hypot(dx, dy);
-      const ready = dy <= -threshold();
+      const ready = isCommitReady();
       stage?.classList.toggle('card-drag-active', moved >= 8);
       stage?.classList.toggle('card-commit-ready', ready);
       card.classList.toggle('is-commit-ready', ready);
@@ -404,6 +434,7 @@ export function createTinterUI({
     const end = (event, cancelled = false) => {
       if (!dragging || state.busy) return;
       event?.preventDefault();
+      if (event && Number.isFinite(event.clientX)) sample(event);
       dragging = false;
       card.classList.remove('is-dragging');
       if (frame) {
@@ -412,13 +443,13 @@ export function createTinterUI({
         draw();
       }
       const moved = Math.hypot(dx, dy);
-      const deliberate = dy <= -threshold();
+      const deliberate = isCommitReady();
       try {
         if (pointerId !== null) card.releasePointerCapture(pointerId);
       } catch {}
       pointerId = null;
-      if (!cancelled && moved < 9) selectCard(card, side, 0, -30);
-      else if (!cancelled && deliberate) selectCard(card, side, dx, dy);
+      if (!cancelled && moved < 9) selectCard(card, side, 0, -30, 0, 0);
+      else if (!cancelled && deliberate) selectCard(card, side, dx, dy, velocityX, velocityY);
       else returnCard(card);
     };
 
@@ -428,10 +459,10 @@ export function createTinterUI({
       event.stopPropagation();
       dragging = true;
       pointerId = event.pointerId;
-      startX = event.clientX;
-      startY = event.clientY;
-      dx = 0;
-      dy = 0;
+      startX = sampleX = event.clientX;
+      startY = sampleY = event.clientY;
+      sampleTime = Number.isFinite(event.timeStamp) ? event.timeStamp : performance.now();
+      dx = dy = velocityX = velocityY = 0;
       other = qa('.smooth-card').find(item => item !== card);
       card.classList.add('is-dragging');
       try {
@@ -442,8 +473,8 @@ export function createTinterUI({
     card.onpointermove = event => {
       if (!dragging || state.busy) return;
       event.preventDefault();
-      dx = event.clientX - startX;
-      dy = event.clientY - startY;
+      const points = event.getCoalescedEvents?.() || [event];
+      for (const point of points) sample(point);
       if (!frame) frame = requestAnimationFrame(draw);
     };
     card.onpointerup = event => end(event, false);
@@ -451,18 +482,27 @@ export function createTinterUI({
     card.onkeydown = event => {
       if ((event.key === 'Enter' || event.key === ' ') && !state.busy && state.interactionReady) {
         event.preventDefault();
-        selectCard(card, side, 0, -30);
+        selectCard(card, side, 0, -30, 0, 0);
       }
     };
   }
 
-  function selectCard(card, side, dx = 0, dy = -30) {
+  function selectCard(card, side, dx = 0, dy = -30, velocityX = 0, velocityY = 0) {
     if (state.busy || !state.interactionReady || helpOpen) return;
     const accepted = onChoose(side);
     if (accepted === false) return;
-    const rotation = dx === 0 ? (side === 'left' ? -12 : 12) : (dx > 0 ? 16 : -16);
+    const speed = Math.hypot(velocityX, velocityY);
+    const carryX = clamp(velocityX * 190, -260, 260);
+    const carryY = clamp(velocityY * 300, -680, 100);
+    const throwX = dx * 1.06 + carryX;
+    const throwY = Math.min(dy - 280, dy + carryY - 170);
+    const rotation = dx === 0 ? (side === 'left' ? -12 : 12) : clamp((dx + carryX) / 12, -22, 22);
+    const duration = Math.round(clamp(300 - speed * 70, 155, 270));
+    const scale = 1.16 + Math.min(.18, speed * .055);
     card.classList.add('is-throwing');
-    card.style.transform = `translate3d(${dx * 1.08}px,${dy - 250}px,0) rotate(${rotation}deg) scale(1.14)`;
+    card.style.transitionDuration = `${duration}ms`;
+    card.style.transitionTimingFunction = 'cubic-bezier(.14,.82,.25,1)';
+    card.style.transform = `translate3d(${throwX}px,${throwY}px,0) rotate(${rotation}deg) scale(${scale})`;
     q('#tinterStage').classList.add('smooth-done');
     const drape = q('#smoothDrape');
     if (drape) {
@@ -482,12 +522,8 @@ export function createTinterUI({
     }
   }
 
-  const setProgress = percent => {
-    q('#tinterBar').style.width = `${clamp(percent, 0, 100)}%`;
-  };
-  const setStatus = (text = '') => {
-    q('#tinterStatus').textContent = text;
-  };
+  const setProgress = percent => { q('#tinterBar').style.width = `${clamp(percent, 0, 100)}%`; };
+  const setStatus = (text = '') => { q('#tinterStatus').textContent = text; };
   const clearCards = () => q('#smoothDeck').replaceChildren();
   const setDone = (done = true) => q('#tinterCard').classList.toggle('done', done);
 
@@ -517,44 +553,30 @@ export function createTinterUI({
     q('#tinterTint').value = tint;
   }
 
-  const setBalanceNote = text => {
-    q('#tinterBalanceNote').textContent = text;
-  };
+  const setBalanceNote = text => { q('#tinterBalanceNote').textContent = text; };
 
   function applyFilters({ warmth = 0, tint = 0 }) {
     const warmAlpha = Math.min(.42, Math.abs(warmth) / 190);
     const tintAlpha = Math.min(.28, Math.abs(tint) / 220);
     q('#tinterWarmFilter').style.background = warmth < 0
       ? `rgba(70,120,255,${warmAlpha})`
-      : warmth > 0
-        ? `rgba(255,170,70,${warmAlpha})`
-        : 'transparent';
+      : warmth > 0 ? `rgba(255,170,70,${warmAlpha})` : 'transparent';
     q('#tinterTintFilter').style.background = tint < 0
       ? `rgba(60,180,110,${tintAlpha})`
-      : tint > 0
-        ? `rgba(220,80,190,${tintAlpha})`
-        : 'transparent';
+      : tint > 0 ? `rgba(220,80,190,${tintAlpha})` : 'transparent';
   }
 
   function handleKeydown(event) {
     if (q('#tinterModal')?.hidden) return;
     if (event.key === 'Escape') {
-      if (helpOpen) {
-        closeHelp();
-        return;
-      }
-      if (settingsOpen) {
-        setSettingsOpen(false);
-        return;
-      }
+      if (helpOpen) return closeHelp();
+      if (settingsOpen) return setSettingsOpen(false);
       onClose({ scrollToResults: false });
       return;
     }
     if (event.key !== 'Tab') return;
-    const focusable = qa(
-      'button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])',
-      q('#tinterCard')
-    ).filter(element => element.offsetParent !== null);
+    const focusable = qa('button:not([disabled]),input:not([disabled]),[tabindex]:not([tabindex="-1"])', q('#tinterCard'))
+      .filter(element => element.offsetParent !== null);
     if (!focusable.length) return;
     const first = focusable[0];
     const last = focusable.at(-1);
@@ -589,6 +611,8 @@ export function createTinterUI({
     setBalance,
     setBalanceNote,
     applyFilters,
+    refreshViewport,
+    resetCameraFrame,
     isHelpOpen: () => helpOpen,
     isSettingsOpen: () => settingsOpen
   };
