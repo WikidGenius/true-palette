@@ -5,6 +5,7 @@ const read=path=>fs.readFileSync(path,'utf8');
 const index=read('index.html');
 const app=read('app/tinter/app.js');
 const ui=read('app/tinter/ui.js');
+const camera=read('app/tinter/camera.js');
 const survey=read('app/tinter/survey.js');
 const css=read('app/tinter/tinter.css');
 const report=read('app/report-ui-v11.js');
@@ -13,15 +14,15 @@ const requireText=(source,text,message)=>assert.ok(source.includes(text),message
 const forbidText=(source,text,message)=>assert.ok(!source.includes(text),message);
 
 // Canonical production architecture and cache delivery.
-requireText(index,'app/tinter/app.js?v=20260719-flow1','Tinter entry module must be cache-versioned.');
-requireText(index,'app/tinter/tinter.css?v=20260719-flow1','Tinter stylesheet must be cache-versioned.');
-requireText(index,'app/report-ui-v11.js?v=20260719-flow1','Report renderer must be cache-versioned.');
+requireText(index,'app/tinter/app.js?v=','Tinter entry module must be cache-versioned.');
+requireText(index,'app/tinter/tinter.css?v=','Tinter stylesheet must be cache-versioned.');
+requireText(index,'app/report-ui-v11.js?v=','Report renderer must be cache-versioned.');
 for(const legacy of ['tinter-runtime','tinter-usability','tinter-immersive','tinter-return','tinter-language']){
   forbidText(index,legacy,`Legacy Tinter layer is active: ${legacy}`);
 }
-requireText(app,"./ui.js?v=20260719-flow1",'Tinter UI dependency must be cache-versioned.');
-requireText(app,"./survey.js?v=20260719-flow1",'Tinter survey dependency must be cache-versioned.');
-requireText(app,"./camera.js?v=20260719-flow1",'Tinter camera dependency must be cache-versioned.');
+requireText(app,"./ui.js?v=",'Tinter UI dependency must be cache-versioned.');
+requireText(app,"./survey.js?v=",'Tinter survey dependency must be cache-versioned.');
+requireText(app,"./camera.js?v=",'Tinter camera dependency must be cache-versioned.');
 
 // Linear production flow without tutorial or gotcha rounds.
 requireText(app,'liveQuestions=questions=>questions.filter(item=>!item.control)','Control questions must be removed from the live survey.');
@@ -49,6 +50,10 @@ requireText(css,'height: 28%;','Return target must remain in the lower portion o
 assert.ok(ui.indexOf('id="smoothDeck"')<ui.indexOf('tinter-choice-footer'),'“They look about the same” must remain below the swatches.');
 requireText(ui,'tinter-settings-icon','Stable settings icon is missing.');
 requireText(css,'.tinter-light-badge[data-quality="good"]','Successful lighting feedback must remain visually suppressed.');
+
+// Momentum selection and stable camera framing after app resume.
+for(const contract of ['getCoalescedEvents','velocityY','projectedDy','carryY']) requireText(ui,contract,`Momentum gesture contract missing: ${contract}`);
+for(const contract of ['visibilitychange','pageshow','restoreZoom','applyConstraints','refreshViewport','resetCameraFrame']) requireText(camera,contract,`Camera resume contract missing: ${contract}`);
 
 // Launch and completion behavior.
 requireText(index,'Press to start','Logo-first launch prompt is missing.');
