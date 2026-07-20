@@ -13,15 +13,22 @@ const requireText=(source,text,message)=>assert.ok(source.includes(text),message
 const forbidText=(source,text,message)=>assert.ok(!source.includes(text),message);
 
 // Canonical production architecture and cache delivery.
-requireText(index,'app/tinter/app.js?v=20260719-audit1','Tinter entry module must be cache-versioned.');
-requireText(index,'app/tinter/tinter.css?v=20260719-audit1','Tinter stylesheet must be cache-versioned.');
-requireText(index,'app/report-ui-v11.js?v=20260719-audit1','Report renderer must be cache-versioned.');
+requireText(index,'app/tinter/app.js?v=20260719-flow1','Tinter entry module must be cache-versioned.');
+requireText(index,'app/tinter/tinter.css?v=20260719-flow1','Tinter stylesheet must be cache-versioned.');
+requireText(index,'app/report-ui-v11.js?v=20260719-flow1','Report renderer must be cache-versioned.');
 for(const legacy of ['tinter-runtime','tinter-usability','tinter-immersive','tinter-return','tinter-language']){
   forbidText(index,legacy,`Legacy Tinter layer is active: ${legacy}`);
 }
-requireText(app,"./ui.js?v=20260719-audit1",'Tinter UI dependency must be cache-versioned.');
-requireText(app,"./survey.js?v=20260719-audit1",'Tinter survey dependency must be cache-versioned.');
-requireText(app,"./camera.js?v=20260719-audit1",'Tinter camera dependency must be cache-versioned.');
+requireText(app,"./ui.js?v=20260719-flow1",'Tinter UI dependency must be cache-versioned.');
+requireText(app,"./survey.js?v=20260719-flow1",'Tinter survey dependency must be cache-versioned.');
+requireText(app,"./camera.js?v=20260719-flow1",'Tinter camera dependency must be cache-versioned.');
+
+// Linear production flow without tutorial or gotcha rounds.
+requireText(app,'liveQuestions=questions=>questions.filter(item=>!item.control)','Control questions must be removed from the live survey.');
+requireText(app,'state.queue=liveQuestions(TinterSurvey.buildInitialQueue())','The active queue must use only real comparisons.');
+requireText(app,'estimatedTotal:12','The shorter flow estimate must be used.');
+requireText(index,'Usually 12–14 comparisons','The launch page must describe the shorter flow.');
+forbidText(app,'calibrationPassed','Calibration must not be exposed in result data.');
 
 // Literal, beginner-friendly questions and contextual help.
 requireText(survey,'Which neutral makes your skin look more even?','Foundation wording must remain literal.');
