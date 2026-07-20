@@ -1,8 +1,8 @@
 'use strict';
 
-import { TinterSurvey } from './survey.js?v=20260719-flow1';
-import { createTinterUI } from './ui.js?v=20260719-flow1';
-import { createCameraController } from './camera.js?v=20260719-flow1';
+import { TinterSurvey } from './survey.js?v=20260720-gesture1';
+import { createTinterUI } from './ui.js?v=20260720-gesture1';
+import { createCameraController } from './camera.js?v=20260720-gesture1';
 
 const HISTORY_KEY='truePalette.tinter.sessions.v1';
 const zeroMap=()=>Object.fromEntries(TinterSurvey.AXES.map(axis=>[axis,0]));
