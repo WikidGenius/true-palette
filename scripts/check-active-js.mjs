@@ -3,8 +3,9 @@ import {execFileSync} from 'node:child_process';
 
 const fail=message=>{console.error(`\nQuality check failed: ${message}`);process.exit(1)};
 const html=fs.readFileSync('index.html','utf8');
-const scripts=[...html.matchAll(/<script[^>]+src="([^"]+\.js)"/g)].map(match=>match[1]);
-const styles=[...html.matchAll(/<link\s+rel="stylesheet"\s+href="([^"]+\.css)"/g)].map(match=>match[1]);
+const assetPath=url=>String(url).split(/[?#]/,1)[0];
+const scripts=[...html.matchAll(/<script[^>]+src="([^"]+\.js(?:[?#][^"]*)?)"/g)].map(match=>assetPath(match[1]));
+const styles=[...html.matchAll(/<link\s+rel="stylesheet"\s+href="([^"]+\.css(?:[?#][^"]*)?)"/g)].map(match=>assetPath(match[1]));
 const canonicalModules=['app/tinter/survey.js','app/tinter/ui.js','app/tinter/camera.js','app/tinter/app.js'];
 
 if(!scripts.length)fail('index.html does not load JavaScript.');
