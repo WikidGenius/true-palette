@@ -22,7 +22,7 @@
 
   function humanizeEvidenceLine(item){
     let text=String(item??'').trim();
-    text=text.replace(/\((\d+)\s+checks?\)\.?$/i,(_,count)=>`across ${countLabel(Number(count),'check')}.`);
+    text=text.replace(/\s*\(\d+\s+checks?\)\.?$/i,'.');
     return text?text.charAt(0).toUpperCase()+text.slice(1):text;
   }
 
@@ -57,53 +57,60 @@
     });
   }
 
-  const evidenceHtml=report=>`<ul>${evidenceItems(report).map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul>`;
+  const evidenceHtml=report=>`<ul class="report-evidence-list">${evidenceItems(report).map(item=>`<li><span class="report-evidence-check" aria-hidden="true">✓</span><span>${escapeHtml(item)}</span></li>`).join('')}</ul>`;
 
   function outfitsHtml(report){
     return `<div class="outfit-combos">${window.outfitCombinations(report).map(combo=>`<div class="outfit-combo"><span class="combo-dots">${combo.map(color=>`<i style="background:${color[1]}"></i>`).join('')}</span><span>${combo.map(color=>escapeHtml(color[0])).join(' + ')}</span></div>`).join('')}</div>`;
   }
 
-  function surveyBadges(report){
+  function diagnosticMetrics(report,confidence){
     const tinter=report.tinter;
-    if(!tinter)return '';
-    const badges=[];
-    if(tinter.comparisons)badges.push(countLabel(tinter.comparisons,'comparison'));
-    if(tinter.adaptiveQuestions)badges.push(countLabel(tinter.adaptiveQuestions,'follow-up check'));
+    const metrics=[confidenceBadgeText(confidence)];
+    if(!tinter)return metrics;
+    if(tinter.comparisons)metrics.push(countLabel(tinter.comparisons,'comparison'));
+    if(tinter.adaptiveQuestions)metrics.push(countLabel(tinter.adaptiveQuestions,'follow-up check'));
     const validation=tinter.validation;
     if(validation?.count){
       const outcome=validation.decisive?`${validation.correct}/${validation.decisive} prediction checks matched`:countLabel(validation.ties,'validation tie');
-      badges.push(outcome);
+      metrics.push(outcome);
     }
     const calibration=tinter.surveyQuality?.calibrationScore;
-    if(Number.isFinite(calibration))badges.push(calibration===1?'Calibration passed':calibration>0?'Calibration mixed':'Calibration missed');
+    if(Number.isFinite(calibration))metrics.push(calibration===1?'Calibration passed':calibration>0?'Calibration mixed':'Calibration missed');
     const lighting=tinter.lighting?.key;
-    if(lighting&&lighting!=='skipped')badges.push(lighting==='good'?'Good lighting':lighting==='okay'?'Fair lighting':'Poor lighting');
+    if(lighting&&lighting!=='skipped')metrics.push(lighting==='good'?'Good lighting':lighting==='okay'?'Fair lighting':'Poor lighting');
     const match=stabilityPercent(tinter.stability);
-    if(match!==null)badges.push(`${match}% retest match`);
-    return badges.map(label=>`<span class="confidence-badge">${escapeHtml(label)}</span>`).join('');
+    if(match!==null)metrics.push(`${match}% retest match`);
+    if(report.refined)metrics.push('Refined with observations');
+    return metrics;
   }
 
-  function surveyChecks(report){
+  function diagnosticNotes(report,confidence){
+    const notes=[];
+    if(confidence?.description)notes.push(confidence.description);
     const tinter=report.tinter;
-    if(!tinter)return '';
-    const items=[];
+    if(!tinter)return notes;
     const validation=tinter.validation;
     if(validation?.count){
-      if(validation.decisive)items.push(`The final prediction checks matched ${validation.correct} of ${validation.decisive} decisive choices.`);
-      if(validation.ties)items.push(`${countLabel(validation.ties,'validation comparison')} ${validation.ties===1?'was':'were'} too close to call.`);
+      if(validation.decisive)notes.push(`The final prediction checks matched ${validation.correct} of ${validation.decisive} decisive choices.`);
+      if(validation.ties)notes.push(`${countLabel(validation.ties,'validation comparison')} ${validation.ties===1?'was':'were'} too close to call.`);
     }
     if(tinter.stability){
       const match=stabilityPercent(tinter.stability);
       const label=String(tinter.stability.label||'').toLowerCase();
       const sentence=label.includes('very stable')?'This result closely matched your previous session':label.includes('mostly stable')?'This result mostly matched your previous session':'This result changed noticeably from your previous session';
-      items.push(`${sentence}${match===null?'.':` (${match}% match).`}`);
+      notes.push(`${sentence}${match===null?'.':` (${match}% match).`}`);
     }
     const lighting=tinter.lighting;
-    if(lighting?.key==='low')items.push('Poor lighting made the camera-based choices less reliable, so they were weighted more cautiously.');
-    else if(lighting?.key==='okay')items.push('Lighting was usable, though neutral daylight may improve repeatability.');
-    else if(lighting?.key==='good')items.push('The automatic exposure and color-cast check passed.');
-    if(!items.length)return '';
-    return `<section class="report-insight report-insight-wide"><h3>Survey quality</h3><ul>${items.map(item=>`<li>${escapeHtml(item)}</li>`).join('')}</ul></section>`;
+    if(lighting?.key==='low')notes.push('Poor lighting made the camera-based choices less reliable, so they were weighted more cautiously.');
+    else if(lighting?.key==='okay')notes.push('Lighting was usable, though neutral daylight may improve repeatability.');
+    return notes;
+  }
+
+  function analysisDetails(report,confidence){
+    const metrics=diagnosticMetrics(report,confidence);
+    const notes=diagnosticNotes(report,confidence);
+    if(!metrics.length&&!notes.length)return '';
+    return `<details class="report-diagnostics"><summary aria-label="View analysis details"><span class="report-info-icon" aria-hidden="true">i</span><span class="report-sr-only">View analysis details</span></summary><div class="report-diagnostics-panel"><p class="report-diagnostics-title">Analysis details</p><div class="report-diagnostics-pills">${metrics.map(label=>`<span>${escapeHtml(label)}</span>`).join('')}</div>${notes.length?`<ul>${notes.map(note=>`<li>${escapeHtml(note)}</li>`).join('')}</ul>`:''}</div></details>`;
   }
 
   window.renderReport=function(report){
@@ -120,12 +127,11 @@
         <p class="report-client">${named?escapeHtml(report.client):escapeHtml(window.profileWords(report))}</p>
         <h2 class="report-palette">${escapeHtml(window.seasonName(report))}</h2>
         <p class="report-desc">${escapeHtml(window.styleReportText(report))}</p>
-        <div class="report-confidence"><span class="confidence-badge">${escapeHtml(confidenceBadgeText(confidence))}</span>${surveyBadges(report)}${report.refined?'<span class="confidence-badge">Refined with observations</span>':''}</div>
+        ${analysisDetails(report,confidence)}
       </div>
       <div class="report-insight-grid">
-        <section class="report-insight"><h3>Why these colors</h3>${evidenceHtml(report)}${confidence.description?`<p class="muted">${escapeHtml(confidence.description)}</p>`:''}</section>
+        <section class="report-insight"><h3>Why these colors</h3>${evidenceHtml(report)}</section>
         <section class="report-insight"><h3>Easy outfit combinations</h3>${outfitsHtml(report)}</section>
-        ${surveyChecks(report)}
         <section class="report-insight report-insight-wide"><h3>Use more carefully near the face</h3><ul>${window.cautionColors(report).map(color=>`<li>${escapeHtml(color)}</li>`).join('')}</ul></section>
       </div>
       <p class="report-palette-title">Wardrobe palette</p>
