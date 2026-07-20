@@ -1,8 +1,8 @@
 'use strict';
 
-import { TinterSurvey } from './survey.js?v=20260719-audit1';
-import { createTinterUI } from './ui.js?v=20260719-audit1';
-import { createCameraController } from './camera.js?v=20260719-audit1';
+import { TinterSurvey } from './survey.js?v=20260719-flow1';
+import { createTinterUI } from './ui.js?v=20260719-flow1';
+import { createCameraController } from './camera.js?v=20260719-flow1';
 
 const HISTORY_KEY='truePalette.tinter.sessions.v1';
 const zeroMap=()=>Object.fromEntries(TinterSurvey.AXES.map(axis=>[axis,0]));
@@ -10,12 +10,13 @@ const cleanEvidence=line=>String(line??'')
   .replace(/\s*\(\d+\s+checks?\)\.?$/i,'.')
   .replace(/\s+(?:across|from|in)\s+\d+\s+checks?\.?$/i,'.')
   .trim();
+const liveQuestions=questions=>questions.filter(item=>!item.control);
 
 const state=window.Tinter={
   i:0,queue:[],responses:[],answers:[],scores:zeroMap(),evidence:zeroMap(),result:null,
   stream:null,lightingConfidence:'checking',lightingQuality:null,interactionReady:false,busy:false,
   adaptivePlanned:false,resolutionPlanned:false,validationPlanned:false,
-  initialLength:0,estimatedTotal:14,progressPct:0,shownAt:0,sessionId:0
+  initialLength:0,estimatedTotal:12,progressPct:0,shownAt:0,sessionId:0
 };
 
 const currentQuestion=()=>state.queue[state.i]||null;
@@ -66,7 +67,7 @@ function saveHistory(rec){
 function resetSession(){
   camera.stop();
   state.i=0;
-  state.queue=TinterSurvey.buildInitialQueue();
+  state.queue=liveQuestions(TinterSurvey.buildInitialQueue());
   state.initialLength=state.queue.length;
   state.responses=[];
   state.answers=state.responses;
@@ -80,7 +81,7 @@ function resetSession(){
   state.adaptivePlanned=false;
   state.resolutionPlanned=false;
   state.validationPlanned=false;
-  state.estimatedTotal=14;
+  state.estimatedTotal=12;
   state.progressPct=0;
   camera.resetBalance();
 }
@@ -126,7 +127,7 @@ function extendQueue(){
     const additions=TinterSurvey.planAdaptive({responses:state.responses,scores:state.scores,evidence:state.evidence,queue:state.queue});
     state.queue.push(...additions);
     state.adaptivePlanned=true;
-    state.estimatedTotal=Math.max(state.estimatedTotal,state.queue.length+3);
+    state.estimatedTotal=Math.max(state.estimatedTotal,state.queue.length+2);
     if(additions.length)ui.setStatus('The next comparisons are closer.');
   }
   if(state.adaptivePlanned&&!state.resolutionPlanned&&state.i>=state.queue.length){
@@ -170,15 +171,17 @@ function buildResult(){
   const locks=typeof window.lockRanges==='function'?window.lockRanges({contrast},rec.temp,-rec.value/70,rec.hue>15?1:rec.hue<-15?-1:0):{};
   const prior=readHistory()[0];
   const stability=prior?.rec?TinterSurvey.compareSessions(rec,prior.rec):null;
+  const publicQuality={...quality};
+  delete publicQuality.calibrationScore;
   const report={
     client:'Client',direction,rec,alt:{...rec},locks,source:'tinter',
     tinter:{
       answers:[...state.responses],responses:[...state.responses],scores:{...state.scores},evidenceWeights:{...state.evidence},
       axisConfidence:stats,confidence,evidence:TinterSurvey.evidenceLines(stats,rec).map(cleanEvidence),
       comparisons:state.responses.length,
-      scoredComparisons:state.responses.filter(item=>!item.control&&!item.validation).length,
+      scoredComparisons:state.responses.filter(item=>!item.validation).length,
       adaptiveQuestions:state.responses.filter(item=>['tiebreaker','challenge','final'].includes(item.stage)).length,
-      surveyQuality:quality,calibrationPassed:quality.calibrationScore===1,
+      surveyQuality:publicQuality,
       validation,stability,lighting:state.lightingQuality
     }
   };
