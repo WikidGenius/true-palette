@@ -1,11 +1,15 @@
 'use strict';
 
-import { TinterSurvey } from './survey.js';
-import { createTinterUI } from './ui.js';
-import { createCameraController } from './camera.js';
+import { TinterSurvey } from './survey.js?v=20260719-audit1';
+import { createTinterUI } from './ui.js?v=20260719-audit1';
+import { createCameraController } from './camera.js?v=20260719-audit1';
 
 const HISTORY_KEY='truePalette.tinter.sessions.v1';
 const zeroMap=()=>Object.fromEntries(TinterSurvey.AXES.map(axis=>[axis,0]));
+const cleanEvidence=line=>String(line??'')
+  .replace(/\s*\(\d+\s+checks?\)\.?$/i,'.')
+  .replace(/\s+(?:across|from|in)\s+\d+\s+checks?\.?$/i,'.')
+  .trim();
 
 const state=window.Tinter={
   i:0,queue:[],responses:[],answers:[],scores:zeroMap(),evidence:zeroMap(),result:null,
@@ -170,7 +174,7 @@ function buildResult(){
     client:'Client',direction,rec,alt:{...rec},locks,source:'tinter',
     tinter:{
       answers:[...state.responses],responses:[...state.responses],scores:{...state.scores},evidenceWeights:{...state.evidence},
-      axisConfidence:stats,confidence,evidence:TinterSurvey.evidenceLines(stats,rec),
+      axisConfidence:stats,confidence,evidence:TinterSurvey.evidenceLines(stats,rec).map(cleanEvidence),
       comparisons:state.responses.length,
       scoredComparisons:state.responses.filter(item=>!item.control&&!item.validation).length,
       adaptiveQuestions:state.responses.filter(item=>['tiebreaker','challenge','final'].includes(item.stage)).length,
